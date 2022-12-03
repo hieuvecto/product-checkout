@@ -8,10 +8,15 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateTimeUtil } from 'src/common/dateTime/dateTime.util';
 import { TransactionInterface } from 'src/common/transaction/transaction.interface';
-import { QueryRunner, Repository } from 'typeorm';
+import {
+  QueryBuilder,
+  QueryRunner,
+  Repository,
+  SelectQueryBuilder,
+} from 'typeorm';
 import { CreateTeamInput } from './dto/create_team_input.dto';
-import { DeleteTeamInput } from './dto/delete_team_input.dto';
-import { GetTeamParamsInput } from './dto/get_team_params_input.dto';
+import { GetTeamsQueryInput } from './dto/get_teams_query_input.dto';
+import { TeamParamInput } from './dto/team_param_input.dto';
 import { UpdateTeamInput } from './dto/update_team_input.dto';
 import { Team } from './team.model';
 
@@ -56,7 +61,7 @@ export class TeamsService {
     }
   }
 
-  async getTeam({ name }: GetTeamParamsInput): Promise<Team> {
+  async getTeam({ name }: TeamParamInput): Promise<Team> {
     const qb = this.teamRepository.createQueryBuilder('team').where({
       name,
       deletedAt: null,
@@ -68,7 +73,25 @@ export class TeamsService {
     });
   }
 
-  async updateTeam(args: UpdateTeamInput): Promise<Team> {
+  async getTeams({ limit, offset }: GetTeamsQueryInput): Promise<Team[]> {
+    const qb = this.teamRepository
+      .createQueryBuilder('team')
+      .where({
+        deletedAt: null,
+      })
+      .take(limit)
+      .skip(offset);
+
+    return qb.getMany().catch((e) => {
+      this.logger.error(e);
+      throw new Error('Failed to get teams.');
+    });
+  }
+
+  async updateTeam(
+    { name }: TeamParamInput,
+    args: UpdateTeamInput,
+  ): Promise<Team> {
     const queryRunner = await this.transaction
       .startTransaction()
       .catch(async (e) => {
@@ -77,7 +100,7 @@ export class TeamsService {
       });
 
     try {
-      const team = await this.getTeamWithLock(queryRunner, args.name);
+      const team = await this.getTeamByNameWithLock(queryRunner, name);
 
       if (!team) {
         throw new HttpException('Team not found.', HttpStatus.NOT_FOUND);
@@ -103,7 +126,7 @@ export class TeamsService {
     }
   }
 
-  async deleteTeam(args: DeleteTeamInput): Promise<boolean> {
+  async deleteTeam({ name }: TeamParamInput): Promise<boolean> {
     const queryRunner = await this.transaction
       .startTransaction()
       .catch(async (e) => {
@@ -112,7 +135,7 @@ export class TeamsService {
       });
 
     try {
-      const team = await this.getTeamWithLock(queryRunner, args.name);
+      const team = await this.getTeamByNameWithLock(queryRunner, name);
 
       if (!team) {
         throw new HttpException('Team not found.', HttpStatus.NOT_FOUND);
@@ -137,7 +160,21 @@ export class TeamsService {
     }
   }
 
-  private async getTeamWithLock(
+  public async getTeamsByIdsWithLock(
+    queryRunner: QueryRunner,
+    ids: number[],
+  ): Promise<Team[]> {
+    return queryRunner.manager
+      .getRepository(Team)
+      .createQueryBuilder('team')
+      .useTransaction(false)
+      .setLock('pessimistic_write')
+      .where('team.id in (:...ids)', { ids })
+      .andWhere('team.deleted_at is null')
+      .getMany();
+  }
+
+  private async getTeamByNameWithLock(
     queryRunner: QueryRunner,
     name: string,
   ): Promise<Team> {

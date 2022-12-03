@@ -31,18 +31,18 @@ export class Fixture {
   public tournamentName: string;
 
   @Column()
-  readonly homeTeamId: number;
+  public homeTeamId: number;
 
   @ManyToOne((type) => Team, (team) => team.homeFixtures)
   @JoinColumn({ name: 'home_team_id' })
-  readonly homeTeam: Team | null;
+  public homeTeam: Team | null;
 
   @Column()
-  readonly awayTeamId: number;
+  public awayTeamId: number;
 
   @ManyToOne((type) => Team, (team) => team.awayFixtures)
   @JoinColumn({ name: 'away_team_id' })
-  readonly awayTeam: Team | null;
+  public awayTeam: Team | null;
 
   @Column({ default: 0 })
   public homeTeamScore: number;

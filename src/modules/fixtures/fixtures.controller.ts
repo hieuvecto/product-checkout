@@ -1,12 +1,42 @@
-import { Controller, Get } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
+import { CreateFixtureInput } from './dto/create_fixture_input.dto';
+import { FixtureParamInput } from './dto/fixture_param_input.dto';
+import { UpdateFixtureInput } from './dto/update_fixture_input.dto';
+import { Fixture } from './fixture.model';
 import { FixturesService } from './fixtures.service';
 
-@Controller()
+@Controller('fixtures')
 export class FixturesController {
   constructor(private readonly fixturesService: FixturesService) {}
 
-  @Get()
-  getHello(): string {
-    return this.fixturesService.getHello();
+  @Post()
+  async createFixture(@Body() args: CreateFixtureInput): Promise<Fixture> {
+    return this.fixturesService.createFixture(args);
+  }
+
+  @Get(':id')
+  async getFixture(@Param() params: FixtureParamInput): Promise<Fixture> {
+    return this.fixturesService.getFixture(params);
+  }
+
+  @Put(':id')
+  async updateFixture(
+    @Param() params: FixtureParamInput,
+    @Body() args: UpdateFixtureInput,
+  ): Promise<Fixture> {
+    return this.fixturesService.updateFixture(params, args);
+  }
+
+  @Delete(':id')
+  async deleteFixture(@Param() params: FixtureParamInput): Promise<boolean> {
+    return this.fixturesService.deleteFixture(params);
   }
 }

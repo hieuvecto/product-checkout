@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString, Matches, MaxLength } from 'class-validator';
 
-export class GetTeamParamsInput {
+export class TeamParamInput {
   @IsString()
   @IsNotEmpty()
   @MaxLength(32)
