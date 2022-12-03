@@ -27,7 +27,7 @@ export class Fixture {
   @Index()
   public deletedAt: Date | null;
 
-  @Column({ length: 125, collation: 'utf8mb4_unicode_ci' })
+  @Column({ length: 100, collation: 'utf8mb4_unicode_ci' })
   public tournamentName: string;
 
   @Column()

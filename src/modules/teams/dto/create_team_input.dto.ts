@@ -12,8 +12,9 @@ export class CreateTeamInput {
   @MaxLength(32)
   displayName: string;
 
+  // TODO: validate url
   @IsNotEmpty()
   @IsString()
-  @MaxLength(256)
+  @MaxLength(255)
   iconImageUrl: string;
 }

@@ -1,7 +1,12 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateTimeUtil } from 'src/common/dateTime/dateTime.util';
-import { UserInputError } from 'src/common/errors/user_input_error';
 import { TransactionInterface } from 'src/common/transaction/transaction.interface';
 import { QueryRunner, Repository } from 'typeorm';
 import { CreateTeamInput } from './dto/create_team_input.dto';
@@ -75,7 +80,7 @@ export class TeamsService {
       const team = await this.getTeamWithLock(queryRunner, args.name);
 
       if (!team) {
-        throw new UserInputError('Team not found.');
+        throw new HttpException('Team not found.', HttpStatus.NOT_FOUND);
       }
 
       team.displayName = args.displayName ?? team.displayName;
@@ -90,7 +95,7 @@ export class TeamsService {
       if (queryRunner.isTransactionActive)
         await this.transaction.rollback(queryRunner);
 
-      if (e instanceof UserInputError) {
+      if (e instanceof HttpException) {
         throw e;
       }
       this.logger.error(e);
@@ -110,7 +115,7 @@ export class TeamsService {
       const team = await this.getTeamWithLock(queryRunner, args.name);
 
       if (!team) {
-        throw new UserInputError('Team not found.');
+        throw new HttpException('Team not found.', HttpStatus.NOT_FOUND);
       }
 
       team.deletedAt = DateTimeUtil.getCurrentTime();
@@ -124,7 +129,7 @@ export class TeamsService {
       if (queryRunner.isTransactionActive)
         await this.transaction.rollback(queryRunner);
 
-      if (e instanceof UserInputError) {
+      if (e instanceof HttpException) {
         throw e;
       }
       this.logger.error(e);

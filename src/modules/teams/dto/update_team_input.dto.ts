@@ -18,8 +18,9 @@ export class UpdateTeamInput {
   @MaxLength(32)
   displayName?: string;
 
+  // TODO: validate URL
   @IsOptional()
   @IsString()
-  @MaxLength(256)
+  @MaxLength(255)
   iconImageUrl?: string;
 }
