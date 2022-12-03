@@ -1,1 +1,3 @@
-# NestJs-boilerplate
+# nft-metadata-watcher
+
+Nestjs boilerplate
