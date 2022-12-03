@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import { IsBoolean, IsEnum, IsOptional } from 'class-validator';
 import { PaginateQueryInput } from 'src/common/dto/paginate_query_input.dto';
 
@@ -13,7 +13,7 @@ export class FixturesQueryInput extends PaginateQueryInput {
   orderBy: FixturesOrderBy = FixturesOrderBy.begunAt;
 
   @IsOptional()
-  @Type(() => Boolean)
+  @Transform(({ value }) => (value === 'true' ? true : false))
   @IsBoolean()
   asc?: boolean;
 }
