@@ -3,3 +3,8 @@ export enum Environment {
   staging = 'staging',
   production = 'production',
 }
+
+export enum BooleanEnum {
+  true = 'true',
+  false = 'false',
+}

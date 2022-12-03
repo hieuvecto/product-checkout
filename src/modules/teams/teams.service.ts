@@ -27,7 +27,11 @@ export class TeamsService {
 
   private readonly logger = new Logger(TeamsService.name);
 
-  async createTeam(args: CreateTeamInput): Promise<Team> {
+  async createTeam({
+    name,
+    displayName,
+    iconImageUrl,
+  }: CreateTeamInput): Promise<Team> {
     const queryRunner = await this.transaction
       .startTransaction()
       .catch(async (e) => {
@@ -36,10 +40,15 @@ export class TeamsService {
       });
 
     try {
+      const exitedTeam = await this.getTeamByName(name);
+      if (exitedTeam) {
+        throw new HttpException('Team name exited.', HttpStatus.BAD_REQUEST);
+      }
+
       const team = this.teamRepository.create({
-        name: args.name,
-        displayName: args.displayName,
-        iconImageUrl: args.iconImageUrl,
+        name,
+        displayName,
+        iconImageUrl,
       });
 
       await queryRunner.manager.save(team, { reload: true });
@@ -51,6 +60,9 @@ export class TeamsService {
       if (queryRunner.isTransactionActive)
         await this.transaction.rollback(queryRunner);
 
+      if (e instanceof HttpException) {
+        throw e;
+      }
       this.logger.error(e);
       throw new Error('Failed to create team.');
     }
@@ -74,7 +86,7 @@ export class TeamsService {
         throw e;
       }
       this.logger.error(e);
-      throw new Error('Failed to update team.');
+      throw new Error('Failed to get team.');
     }
   }
 
@@ -177,6 +189,15 @@ export class TeamsService {
       .where('team.id in (:...ids)', { ids })
       .andWhere('team.deleted_at is null')
       .getMany();
+  }
+
+  private async getTeamByName(name: string): Promise<Team> {
+    return this.teamRepository
+      .createQueryBuilder('team')
+      .useTransaction(false)
+      .where('team.name = :name', { name })
+      .andWhere('team.deleted_at is null')
+      .getOne();
   }
 
   private async getTeamByNameWithLock(
