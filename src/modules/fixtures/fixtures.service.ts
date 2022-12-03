@@ -49,7 +49,10 @@ export class FixturesService {
       });
 
     try {
-      if (homeTeamId === awayTeamId || isBefore(endedAt, begunAt)) {
+      if (
+        homeTeamId === awayTeamId ||
+        DateTimeUtil.isBefore(endedAt, begunAt)
+      ) {
         throw new HttpException('Unvalid parameters', HttpStatus.BAD_REQUEST);
       }
 
@@ -173,7 +176,7 @@ export class FixturesService {
 
       if (
         fixture.homeTeamId === fixture.awayTeamId ||
-        isBefore(fixture.endedAt, fixture.begunAt)
+        DateTimeUtil.isBefore(fixture.endedAt, fixture.begunAt)
       ) {
         throw new HttpException('Unvalid parameters', HttpStatus.BAD_REQUEST);
       }

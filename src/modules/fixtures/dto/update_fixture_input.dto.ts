@@ -2,11 +2,12 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsDate,
-  IsNotEmpty,
+  IsInt,
   IsOptional,
   IsPositive,
   IsString,
   MaxLength,
+  Min,
 } from 'class-validator';
 
 export class UpdateFixtureInput {
@@ -56,13 +57,15 @@ export class UpdateFixtureInput {
     minimum: 0,
   })
   @IsOptional()
-  @IsPositive()
+  @IsInt()
+  @Min(0)
   homeTeamScore?: number;
 
   @ApiPropertyOptional({
     minimum: 0,
   })
   @IsOptional()
-  @IsPositive()
+  @IsInt()
+  @Min(0)
   awayTeamScore?: number;
 }
