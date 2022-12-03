@@ -81,7 +81,9 @@ export class MockTransactionService {
     const mockRepositories = new Map<string, any>();
     mockRepositories.set('Team', this.teamRepository);
     mockRepositories.set('Fixture', this.fixtureRepository);
-    return new MockQueryRunner(mockRepositories) as QueryRunner;
+    const queryRunner = new MockQueryRunner(mockRepositories) as QueryRunner;
+    (<any>queryRunner).isTransactionActive = true;
+    return queryRunner;
   });
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

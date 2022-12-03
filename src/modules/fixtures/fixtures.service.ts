@@ -91,17 +91,8 @@ export class FixturesService {
   }
 
   async getFixture({ id }: FixtureParamInput): Promise<Fixture> {
-    const qb = this.fixtureRepository
-      .createQueryBuilder('fixture')
-      .innerJoinAndSelect('fixture.homeTeam', 'homeTeam')
-      .innerJoinAndSelect('fixture.awayTeam', 'awayTeam')
-      .where({
-        id,
-        deletedAt: null,
-      });
-
     try {
-      const fixture = await qb.getOne();
+      const fixture = await this.getFixtureById(id);
       if (!fixture) {
         throw new HttpException('Fixture not found.', HttpStatus.NOT_FOUND);
       }
@@ -112,7 +103,7 @@ export class FixturesService {
         throw e;
       }
       this.logger.error(e);
-      throw new Error('Failed to update fixture.');
+      throw new Error('Failed to get fixture.');
     }
   }
 
@@ -252,6 +243,18 @@ export class FixturesService {
       .setLock('pessimistic_write')
       .where('fixture.id = :id', { id })
       .andWhere('fixture.deleted_at is null')
+      .getOne();
+  }
+
+  private getFixtureById(id: number): Promise<Fixture> {
+    return this.fixtureRepository
+      .createQueryBuilder('fixture')
+      .innerJoinAndSelect('fixture.homeTeam', 'homeTeam')
+      .innerJoinAndSelect('fixture.awayTeam', 'awayTeam')
+      .where({
+        id,
+        deletedAt: null,
+      })
       .getOne();
   }
 }
