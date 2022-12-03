@@ -10,12 +10,12 @@ const ENV = process.env.NODE_ENV;
 @Module({
   imports: [
     FeatureModule,
-    // TypeOrmModule.forRootAsync({
-    //   useFactory: async () => getConnectionOptions('default'),
-    // }),
-    // TypeOrmModule.forRootAsync({
-    //   useFactory: async () => getConnectionOptions('reader'),
-    // }),
+    TypeOrmModule.forRootAsync({
+      useFactory: async () => getConnectionOptions('default'),
+    }),
+    TypeOrmModule.forRootAsync({
+      useFactory: async () => getConnectionOptions('reader'),
+    }),
     ConfigModule.forRoot({
       envFilePath: !ENV ? '.env.development' : `.env.${ENV}`,
       load: [configuration],
