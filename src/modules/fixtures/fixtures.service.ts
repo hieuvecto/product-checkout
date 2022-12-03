@@ -15,6 +15,10 @@ import { Fixture } from './fixture.model';
 import { FixtureParamInput } from './dto/fixture_param_input.dto';
 import { UpdateFixtureInput } from './dto/update_fixture_input.dto';
 import { DateTimeUtil } from 'src/common/dateTime/dateTime.util';
+import {
+  FixturesOrderBy,
+  FixturesQueryInput,
+} from './dto/fixtures_query_input.dto';
 
 @Injectable()
 export class FixturesService {
@@ -93,9 +97,52 @@ export class FixturesService {
         deletedAt: null,
       });
 
-    return qb.getOne().catch((e) => {
+    try {
+      const fixture = await qb.getOne();
+      if (!fixture) {
+        throw new HttpException('Fixture not found.', HttpStatus.NOT_FOUND);
+      }
+
+      return fixture;
+    } catch (e) {
+      if (e instanceof HttpException) {
+        throw e;
+      }
       this.logger.error(e);
-      throw new Error('Failed to get fixture.');
+      throw new Error('Failed to update fixture.');
+    }
+  }
+
+  async getFixtures({
+    orderBy,
+    asc,
+    limit,
+    offset,
+  }: FixturesQueryInput): Promise<Fixture[]> {
+    const qb = this.fixtureRepository
+      .createQueryBuilder('fixture')
+      .innerJoinAndSelect('fixture.homeTeam', 'homeTeam')
+      .innerJoinAndSelect('fixture.awayTeam', 'awayTeam')
+      .where({
+        deletedAt: null,
+      })
+      .take(limit)
+      .skip(offset);
+
+    switch (orderBy) {
+      case FixturesOrderBy.createdAt:
+        qb.orderBy('fixture.createdAt', asc ? 'ASC' : 'DESC');
+        break;
+      case FixturesOrderBy.begunAt:
+        qb.orderBy('fixture.begunAt', asc ? 'ASC' : 'DESC');
+        break;
+      default:
+        break;
+    }
+
+    return qb.getMany().catch((e) => {
+      this.logger.error(e);
+      throw new Error('Failed to get fixtures.');
     });
   }
 
@@ -175,6 +222,8 @@ export class FixturesService {
 
       fixture.deletedAt = DateTimeUtil.getCurrentTime();
       await queryRunner.manager.save(fixture, { reload: false });
+
+      await this.transaction.commit(queryRunner);
 
       return true;
     } catch (e) {

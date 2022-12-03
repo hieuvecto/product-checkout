@@ -8,14 +8,9 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateTimeUtil } from 'src/common/dateTime/dateTime.util';
 import { TransactionInterface } from 'src/common/transaction/transaction.interface';
-import {
-  QueryBuilder,
-  QueryRunner,
-  Repository,
-  SelectQueryBuilder,
-} from 'typeorm';
+import { QueryRunner, Repository } from 'typeorm';
 import { CreateTeamInput } from './dto/create_team_input.dto';
-import { GetTeamsQueryInput } from './dto/get_teams_query_input.dto';
+import { TeamsQueryInput } from './dto/teams_query_input.dto';
 import { TeamParamInput } from './dto/team_param_input.dto';
 import { UpdateTeamInput } from './dto/update_team_input.dto';
 import { Team } from './team.model';
@@ -67,13 +62,23 @@ export class TeamsService {
       deletedAt: null,
     });
 
-    return qb.getOne().catch((e) => {
+    try {
+      const team = await qb.getOne();
+      if (!team) {
+        throw new HttpException('Team not found.', HttpStatus.NOT_FOUND);
+      }
+
+      return team;
+    } catch (e) {
+      if (e instanceof HttpException) {
+        throw e;
+      }
       this.logger.error(e);
-      throw new Error('Failed to get team.');
-    });
+      throw new Error('Failed to update team.');
+    }
   }
 
-  async getTeams({ limit, offset }: GetTeamsQueryInput): Promise<Team[]> {
+  async getTeams({ limit, offset }: TeamsQueryInput): Promise<Team[]> {
     const qb = this.teamRepository
       .createQueryBuilder('team')
       .where({

@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CreateTeamInput } from './dto/create_team_input.dto';
-import { GetTeamsQueryInput } from './dto/get_teams_query_input.dto';
+import { TeamsQueryInput } from './dto/teams_query_input.dto';
 import { TeamParamInput } from './dto/team_param_input.dto';
 import { UpdateTeamInput } from './dto/update_team_input.dto';
 import { Team } from './team.model';
@@ -30,8 +30,8 @@ export class TeamsController {
   }
 
   @Get()
-  async getTeams(@Query() query: GetTeamsQueryInput): Promise<Team[]> {
-    return this.teamsService.getTeams(query);
+  async getTeams(@Query() queries: TeamsQueryInput): Promise<Team[]> {
+    return this.teamsService.getTeams(queries);
   }
 
   @Put(':name')

@@ -6,8 +6,10 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { CreateFixtureInput } from './dto/create_fixture_input.dto';
+import { FixturesQueryInput } from './dto/fixtures_query_input.dto';
 import { FixtureParamInput } from './dto/fixture_param_input.dto';
 import { UpdateFixtureInput } from './dto/update_fixture_input.dto';
 import { Fixture } from './fixture.model';
@@ -25,6 +27,11 @@ export class FixturesController {
   @Get(':id')
   async getFixture(@Param() params: FixtureParamInput): Promise<Fixture> {
     return this.fixturesService.getFixture(params);
+  }
+
+  @Get()
+  async getFixtures(@Query() queries: FixturesQueryInput): Promise<Fixture[]> {
+    return this.fixturesService.getFixtures(queries);
   }
 
   @Put(':id')

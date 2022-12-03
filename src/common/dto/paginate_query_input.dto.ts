@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsNumber, Max, Min, IsOptional } from 'class-validator';
 
-export class PaginateInput {
+export class PaginateQueryInput {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
