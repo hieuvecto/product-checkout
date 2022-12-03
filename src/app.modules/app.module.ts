@@ -1,7 +1,8 @@
 import { Module, HttpModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { FeatureModule } from 'src/modules/feature/feature.module';
+import { FixturesModule } from 'src/modules/fixtures/fixtures.module';
+import { TeamsModule } from 'src/modules/teams/teams.module';
 import { getConnectionOptions } from 'typeorm';
 import configuration from '../config/configuration';
 
@@ -9,7 +10,8 @@ const ENV = process.env.NODE_ENV;
 
 @Module({
   imports: [
-    FeatureModule,
+    FixturesModule,
+    TeamsModule,
     TypeOrmModule.forRootAsync({
       useFactory: async () => getConnectionOptions('default'),
     }),

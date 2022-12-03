@@ -1,3 +1,3 @@
-# nft-metadata-watcher
+# Fixure management
 
 Nestjs boilerplate
