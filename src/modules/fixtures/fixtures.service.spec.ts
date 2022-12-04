@@ -4,6 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import parseISO from 'date-fns/parseISO';
 import { Request } from 'express';
+import { DateTimeUtil } from 'src/common/dateTime/dateTime.util';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { MockTransactionService } from '../../common/transaction/mockTransaction.service';
 import configuration from '../../config/configuration';
@@ -35,8 +36,8 @@ describe('FixturesService', () => {
     },
     homeTeamScore: 0,
     awayTeamScore: 0,
-    begunAt: parseISO('2022-12-16T10:30:00.000Z'),
-    endedAt: parseISO('2022-12-16T12:30:00.000Z'),
+    begunAt: DateTimeUtil.parseISOString('2022-12-16T10:30:00.000Z'),
+    endedAt: DateTimeUtil.parseISOString('2022-12-16T12:30:00.000Z'),
   };
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -91,8 +92,8 @@ describe('FixturesService', () => {
     dto.tournamentName = 'Champion League';
     dto.homeTeamId = 1;
     dto.awayTeamId = 2;
-    dto.begunAt = parseISO('2022-12-16T10:30:00.000Z');
-    dto.endedAt = parseISO('2022-12-16T12:30:00.000Z');
+    dto.begunAt = DateTimeUtil.parseISOString('2022-12-16T10:30:00.000Z');
+    dto.endedAt = DateTimeUtil.parseISOString('2022-12-16T12:30:00.000Z');
 
     return service.createFixture(dto).then((fixture) => {
       expect(fixture.id).toEqual(1);
@@ -126,8 +127,8 @@ describe('FixturesService', () => {
     dto.tournamentName = 'Champion League';
     dto.homeTeamId = 1;
     dto.awayTeamId = 1;
-    dto.begunAt = parseISO('2022-12-16T10:30:00.000Z');
-    dto.endedAt = parseISO('2022-12-16T12:30:00.000Z');
+    dto.begunAt = DateTimeUtil.parseISOString('2022-12-16T10:30:00.000Z');
+    dto.endedAt = DateTimeUtil.parseISOString('2022-12-16T12:30:00.000Z');
 
     return service
       .createFixture(dto)
@@ -166,8 +167,8 @@ describe('FixturesService', () => {
     dto.tournamentName = 'Champion League';
     dto.homeTeamId = 1;
     dto.awayTeamId = 2;
-    dto.begunAt = parseISO('2022-12-17T10:30:00.000Z');
-    dto.endedAt = parseISO('2022-12-16T12:30:00.000Z');
+    dto.begunAt = DateTimeUtil.parseISOString('2022-12-17T10:30:00.000Z');
+    dto.endedAt = DateTimeUtil.parseISOString('2022-12-16T12:30:00.000Z');
 
     return service
       .createFixture(dto)
@@ -203,8 +204,8 @@ describe('FixturesService', () => {
     dto.tournamentName = 'Champion League';
     dto.homeTeamId = 1;
     dto.awayTeamId = 2;
-    dto.begunAt = parseISO('2022-12-16T10:30:00.000Z');
-    dto.endedAt = parseISO('2022-12-16T12:30:00.000Z');
+    dto.begunAt = DateTimeUtil.parseISOString('2022-12-16T10:30:00.000Z');
+    dto.endedAt = DateTimeUtil.parseISOString('2022-12-16T12:30:00.000Z');
 
     return service
       .createFixture(dto)
@@ -363,8 +364,8 @@ describe('FixturesService', () => {
     body.tournamentName = 'Champion League edited';
     body.homeTeamScore = 2;
     body.awayTeamScore = 3;
-    body.begunAt = parseISO('2022-12-17T10:30:00.000Z');
-    body.endedAt = parseISO('2022-12-16T12:30:00.000Z');
+    body.begunAt = DateTimeUtil.parseISOString('2022-12-17T10:30:00.000Z');
+    body.endedAt = DateTimeUtil.parseISOString('2022-12-16T12:30:00.000Z');
 
     return service
       .updateFixture(params, body)

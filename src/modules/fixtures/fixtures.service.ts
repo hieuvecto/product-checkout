@@ -1,4 +1,3 @@
-import { isBefore, parseISO } from 'date-fns';
 import {
   HttpException,
   HttpStatus,
@@ -8,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TransactionInterface } from 'src/common/transaction/transaction.interface';
-import { QueryRunner, Repository } from 'typeorm';
+import { Between, QueryRunner, Repository } from 'typeorm';
 import { TeamsService } from '../teams/teams.service';
 import { CreateFixtureInput } from './dto/create_fixture_input.dto';
 import { Fixture } from './fixture.model';
@@ -19,6 +18,8 @@ import {
   FixturesOrderBy,
   FixturesQueryInput,
 } from './dto/fixtures_query_input.dto';
+import { CheckFixturesQueryInput } from './dto/check_fixtures_query_input.dto';
+import { addDays } from 'date-fns';
 
 @Injectable()
 export class FixturesService {
@@ -112,6 +113,9 @@ export class FixturesService {
     asc,
     limit,
     offset,
+    year,
+    month,
+    day,
   }: FixturesQueryInput): Promise<Fixture[]> {
     const qb = this.fixtureRepository
       .createQueryBuilder('fixture')
@@ -132,6 +136,21 @@ export class FixturesService {
         break;
       default:
         break;
+    }
+
+    if (year && month && day) {
+      const date = DateTimeUtil.createFromYMD(year, month, day);
+      if (!date) {
+        throw new HttpException(
+          'Unvalid year, month, day',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      qb.andWhere('fixture.begunAt BETWEEN :fromDate AND :toDate', {
+        fromDate: date,
+        toDate: addDays(date, 1),
+      });
     }
 
     return qb.getMany().catch((e) => {
@@ -229,6 +248,118 @@ export class FixturesService {
       }
       this.logger.error(e);
       throw new Error('Failed to update fixture.');
+    }
+  }
+
+  async checkIfFixtureStartOnDay({
+    year,
+    month,
+    day,
+  }: CheckFixturesQueryInput): Promise<boolean> {
+    try {
+      if (!year || !month || !day) {
+        throw new HttpException(
+          'Year, month, day are required.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const date = DateTimeUtil.createFromYMD(year, month, day);
+      if (!date) {
+        throw new HttpException(
+          'Unvalid year, month, day.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      const fixture = await this.fixtureRepository
+        .createQueryBuilder('fixture')
+        .where({
+          begunAt: Between(date, addDays(date, 1)),
+          deletedAt: null,
+        })
+        .getOne();
+
+      return !!fixture;
+    } catch (e) {
+      if (e instanceof HttpException) {
+        throw e;
+      }
+      this.logger.error(e);
+      throw new Error('Failed to check fixture.');
+    }
+  }
+
+  /**
+   * Check Fixtures start on the days array in one month. For querying once instead of many queries
+   * when opening calendar.
+   */
+  async checkIfFixturesStartOnDaysInMonth({
+    year,
+    month,
+  }: CheckFixturesQueryInput): Promise<boolean[]> {
+    try {
+      if (!year || !month) {
+        throw new HttpException(
+          'Year, month are required.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      const daysInMonth = DateTimeUtil.getDaysInMonth(year, month);
+
+      // MAYBE DANGEROUS SQL INJECTION: but worthy for increasing the performance when opening the calendar.
+      const baseRawQueryGenerator = (dayIndex: number) => `
+      -- Query for checking whether at least a fixture exists between fromDate and toDate
+        SELECT 
+          id
+          deleted_at
+        FROM 
+          fixtures
+        WHERE 
+          fixtures.begun_at BETWEEN :fromDate${dayIndex} AND : toDate${dayIndex}
+        LIMIT 1
+      `;
+      const unionClause = `
+        UNION
+    `;
+      const rawQuery = daysInMonth
+        .map((date, index) => baseRawQueryGenerator(index))
+        .join(unionClause);
+
+      const qb = this.fixtureRepository.manager
+        .createQueryBuilder()
+        .select('mergedFixtures.*')
+        .from('(' + rawQuery + ')', 'mergedFixtures');
+
+      const paramsObject = {};
+      daysInMonth.forEach((date, index) => {
+        paramsObject[`fromDate${index}`] = date;
+        paramsObject[`toDate${index}`] = addDays(date, 1);
+      });
+
+      qb.setParameters({
+        ...paramsObject,
+      }).where('mergedFixtures.deleted_at is null');
+
+      const rows = await qb.getRawMany();
+
+      const result = daysInMonth.map((date, index) => {
+        const correspondFixture = rows.find(
+          (row) =>
+            DateTimeUtil.isAfter(row['begun_at'], date) &&
+            DateTimeUtil.isBefore(row['begun_at'], addDays(date, 1)),
+        );
+
+        return !!correspondFixture;
+      });
+
+      return result;
+    } catch (e) {
+      if (e instanceof HttpException) {
+        throw e;
+      }
+
+      this.logger.error(e);
+      throw new Error('Failed to check fixtures.');
     }
   }
 

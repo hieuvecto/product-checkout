@@ -1,5 +1,6 @@
 import { validate } from 'class-validator';
 import parseISO from 'date-fns/parseISO';
+import { DateTimeUtil } from 'src/common/dateTime/dateTime.util';
 import { CreateFixtureInput } from './create_fixture_input.dto';
 
 describe('CreateFixtureInput', () => {
@@ -8,8 +9,8 @@ describe('CreateFixtureInput', () => {
     dto.tournamentName = 'Champion League';
     dto.homeTeamId = 1;
     dto.awayTeamId = 2;
-    dto.begunAt = parseISO('2022-12-16T10:30:00.000Z');
-    dto.endedAt = parseISO('2022-12-16T12:30:00.000Z');
+    dto.begunAt = DateTimeUtil.parseISOString('2022-12-16T10:30:00.000Z');
+    dto.endedAt = DateTimeUtil.parseISOString('2022-12-16T12:30:00.000Z');
 
     return validate(dto)
       .then((errors) => {
