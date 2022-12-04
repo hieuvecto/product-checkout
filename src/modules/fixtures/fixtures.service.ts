@@ -308,15 +308,19 @@ export class FixturesService {
 
       // MAYBE DANGEROUS SQL INJECTION: but worthy for increasing the performance when opening the calendar.
       const baseRawQueryGenerator = (dayIndex: number) => `
+      (
       -- Query for checking whether at least a fixture exists between fromDate and toDate
         SELECT 
-          id
-          deleted_at
+          id,
+          deleted_at,
+          begun_at
         FROM 
           fixtures
         WHERE 
-          fixtures.begun_at BETWEEN :fromDate${dayIndex} AND : toDate${dayIndex}
+          fixtures.begun_at BETWEEN :fromDate${dayIndex} AND :toDate${dayIndex}
+          and fixtures.deleted_at is null
         LIMIT 1
+      )
       `;
       const unionClause = `
         UNION
@@ -335,7 +339,6 @@ export class FixturesService {
         paramsObject[`fromDate${index}`] = date;
         paramsObject[`toDate${index}`] = addDays(date, 1);
       });
-
       qb.setParameters({
         ...paramsObject,
       }).where('mergedFixtures.deleted_at is null');
