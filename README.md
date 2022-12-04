@@ -26,3 +26,11 @@ yarn start:app:dev
 
 - After the app starting up, access http://localhost:3000/api to see the swagger docs.
 - Import Fixture_management.postman_collection.json for Postman predefined collection.
+
+# Db diagram:
+
+- Open db_diagram.png file to see the generated db diagram.
+
+# Db import/seed data:
+
+- You can Import local.sql for some predefined data.
