@@ -33,4 +33,4 @@ yarn start:app:dev
 
 # Db import/seed data:
 
-- You can Import local.sql for some predefined data.
+- You can Import local.sql in MySql workbench for some predefined data.
