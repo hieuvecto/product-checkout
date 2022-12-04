@@ -27,8 +27,8 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle('Fixture listing.')
-    .setDescription('The fixture listing api description.')
+    .setTitle('Fixture management.')
+    .setDescription('The fixture management api description.')
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);

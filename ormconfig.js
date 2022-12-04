@@ -55,7 +55,7 @@ const baseDbConfig = {
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   entities: ['dist/**/*.model{.ts,.js}'],
-  synchronize: false,
+  synchronize: process.env.DB_SYNCHRONIZE === 'true' ? true : false,
   migrationsTableName: 'migrations',
   migrations: ['dist/migrations/*{.ts,.js}'],
   cli: {
