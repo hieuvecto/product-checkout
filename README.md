@@ -18,7 +18,7 @@ docker-compose up
 # Wait for mysql starting up, and then run the app in local in another terminal
 yarn start:app:dev
 
-# The db schema would be synchronize for app.
+# The db schema would be synchronized for app.
 
 ```
 

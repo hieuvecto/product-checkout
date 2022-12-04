@@ -19,7 +19,7 @@ describe('DateTimeUtil', () => {
   });
 
   it('success: parseISOString', () => {
-    const d = new Date(Date.UTC(2021, 4, 24, 7, 34, 19, 400)); // monthは0始まり
+    const d = new Date(Date.UTC(2021, 4, 24, 7, 34, 19, 400)); // month start at 0
     expect(DateTimeUtil.parseISOString('2021-05-24T07:34:19.400Z')).toEqual(d);
   });
 

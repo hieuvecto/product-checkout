@@ -65,8 +65,6 @@ const baseDbConfig = {
   logging: false,
 };
 
-// subscribersはDIを使うためコード内から投入する
-// ORMのmaster-slave振り分け機能はSELECTがデフォルトでslaveに向かう（WITH LOCKでも）ので，バグ回避のため使わない
 module.exports = [
   {
     name: 'default',
