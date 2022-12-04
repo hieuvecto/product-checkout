@@ -34,3 +34,11 @@ yarn start:app:dev
 # Db import/seed data:
 
 - You can Import local.sql in MySql workbench for some predefined data.
+
+# Testing:
+
+```sh
+# Run jest test
+yarn test
+
+```
