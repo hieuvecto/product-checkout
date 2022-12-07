@@ -35,6 +35,13 @@ export class FixturesService {
 
   private readonly logger = new Logger(FixturesService.name);
 
+  /**
+   * Create fixture
+   * @param {CreateFixtureInput} args - body input fields such as tournamentName, homeTeamId, awayTeamId, ...
+   * @return {Fixture} Fixture record with the joined homeTeam, awayTeam records.
+   * @throws {HttpException} - Http exception with status code = 400, 404.
+   * @throws {Error} - Internal server error.
+   */
   async createFixture({
     tournamentName,
     homeTeamId,
@@ -50,6 +57,7 @@ export class FixturesService {
       });
 
     try {
+      /** Params validation. */
       if (
         homeTeamId === awayTeamId ||
         DateTimeUtil.isBefore(endedAt, begunAt)
@@ -61,10 +69,10 @@ export class FixturesService {
         homeTeamId,
         awayTeamId,
       ]);
-
       if (teams.length < 2) {
         throw new HttpException('Team not found.', HttpStatus.NOT_FOUND);
       }
+      /** End: Params validation. */
 
       const fixture = this.fixtureRepository.create({
         tournamentName,
@@ -91,6 +99,13 @@ export class FixturesService {
     }
   }
 
+  /**
+   * Get specific fixture record.
+   * @param {FixtureParamInput} {id} - id of fixture record.
+   * @return {Fixture} Fixture record with the joined homeTeam, awayTeam records.
+   * @throws {HttpException} - Http exception with status code = 404.
+   * @throws {Error} - Internal server error.
+   */
   async getFixture({ id }: FixtureParamInput): Promise<Fixture> {
     try {
       const fixture = await this.getFixtureById(id);
@@ -108,6 +123,13 @@ export class FixturesService {
     }
   }
 
+  /**
+   * Get the array of fixture records with specified parameters.
+   * @param {FixturesQueryInput} args - query input fields such as offset, limit, orderBy, asc, ...
+   * @return {Fixture[]} Fixture records.
+   * @throws {HttpException} - Http exception with status code = 400.
+   * @throws {Error} - Internal server error.
+   */
   async getFixtures({
     orderBy,
     asc,
@@ -127,6 +149,7 @@ export class FixturesService {
       .take(limit)
       .skip(offset);
 
+    // Add order by to query builder.
     switch (orderBy) {
       case FixturesOrderBy.createdAt:
         qb.orderBy('fixture.createdAt', asc ? 'ASC' : 'DESC');
@@ -138,6 +161,7 @@ export class FixturesService {
         break;
     }
 
+    // If you want to query fixtures by date, all three year, month, day are required.
     if (year && month && day) {
       const date = DateTimeUtil.createFromYMD(year, month, day);
       if (!date) {
@@ -159,6 +183,14 @@ export class FixturesService {
     });
   }
 
+  /**
+   * Update the fixture record
+   * @param {FixtureParamInput} {id} - id of fixture record.
+   * @param {UpdateFixtureInput} args - body input fields such as tournamentName, homeTeamId, awayTeamId, ...
+   * @return {Fixture} Fixture record with the joined homeTeam, awayTeam records.
+   * @throws {HttpException} - Http exception with status code = 400, 404.
+   * @throws {Error} - Internal server error.
+   */
   async updateFixture(
     { id }: FixtureParamInput,
     args: UpdateFixtureInput,
@@ -176,6 +208,7 @@ export class FixturesService {
         throw new HttpException('Fixture not found.', HttpStatus.NOT_FOUND);
       }
 
+      // Assign the parameters into fixture model.
       fixture.tournamentName = args.tournamentName ?? fixture.tournamentName;
       fixture.homeTeamId = args.homeTeamId ?? fixture.homeTeamId;
       fixture.awayTeamId = args.awayTeamId ?? fixture.awayTeamId;
@@ -184,6 +217,7 @@ export class FixturesService {
       fixture.homeTeamScore = args.homeTeamScore ?? fixture.homeTeamScore;
       fixture.awayTeamScore = args.awayTeamScore ?? fixture.awayTeamScore;
 
+      /** fixture model fields validation. */
       if (
         fixture.homeTeamId === fixture.awayTeamId ||
         DateTimeUtil.isBefore(fixture.endedAt, fixture.begunAt)
@@ -198,9 +232,11 @@ export class FixturesService {
       if (teams.length < 2) {
         throw new HttpException('Team not found.', HttpStatus.NOT_FOUND);
       }
+      /** End: fixture model fields validation. */
 
       await queryRunner.manager.save(fixture, { reload: false });
 
+      // Join the homeTeam, awayTeam models into fixture model for minimizing queries.
       fixture.homeTeam = teams.find((team) => team.id === fixture.homeTeamId);
       fixture.awayTeam = teams.find((team) => team.id === fixture.awayTeamId);
 
@@ -219,6 +255,13 @@ export class FixturesService {
     }
   }
 
+  /**
+   * Set the deleted_at field of fixture record to be now()
+   * @param {FixtureParamInput} {id} - id of fixture record.
+   * @return {Boolean}
+   * @throws {HttpException} - Http exception with status code = 400, 404.
+   * @throws {Error} - Internal server error.
+   */
   async deleteFixture({ id }: FixtureParamInput): Promise<boolean> {
     const queryRunner = await this.transaction
       .startTransaction()
@@ -251,12 +294,20 @@ export class FixturesService {
     }
   }
 
+  /**
+   * Check whether at least a fixture starts on a specified date.
+   * @param {CheckFixturesQueryInput} args - All three year, month, day are required
+   * @return {Boolean}
+   * @throws {HttpException} - Http exception with status code = 400.
+   * @throws {Error} - Internal server error.
+   */
   async checkIfFixtureStartOnDay({
     year,
     month,
     day,
   }: CheckFixturesQueryInput): Promise<boolean> {
     try {
+      /** Year, month, day validation. */
       if (!year || !month || !day) {
         throw new HttpException(
           'Year, month, day are required.',
@@ -271,6 +322,8 @@ export class FixturesService {
           HttpStatus.BAD_REQUEST,
         );
       }
+      /** End: Year, month, day validation. */
+
       const fixture = await this.fixtureRepository
         .createQueryBuilder('fixture')
         .where({
@@ -290,14 +343,19 @@ export class FixturesService {
   }
 
   /**
-   * Check Fixtures start on the days array in one month. For querying once instead of many queries
-   * when opening calendar.
+   * Check whether Fixtures start on each day one month. For querying once instead of many queries
+   * when opening the calendar.
+   * @param {CheckFixturesQueryInput} args - year, month are required
+   * @return {Boolean}
+   * @throws {HttpException} - Http exception with status code = 400.
+   * @throws {Error} - Internal server error.
    */
   async checkIfFixturesStartOnDaysInMonth({
     year,
     month,
   }: CheckFixturesQueryInput): Promise<boolean[]> {
     try {
+      // Year, month validations.
       if (!year || !month) {
         throw new HttpException(
           'Year, month are required.',
@@ -329,12 +387,14 @@ export class FixturesService {
         .map((date, index) => baseRawQueryGenerator(index))
         .join(unionClause);
 
+      // Create the query buider with the generated raw query.
       const qb = this.fixtureRepository.manager
         .createQueryBuilder()
         .select('mergedFixtures.*')
         .from('(' + rawQuery + ')', 'mergedFixtures');
 
-      const paramsObject = {};
+      // Compute the params object and set it into the query builder.
+      const paramsObject: Record<string, Date> = {};
       daysInMonth.forEach((date, index) => {
         paramsObject[`fromDate${index}`] = date;
         paramsObject[`toDate${index}`] = addDays(date, 1);
@@ -345,6 +405,7 @@ export class FixturesService {
 
       const rows = await qb.getRawMany();
 
+      // Extract the rows and compute the boolean result on each day.
       const result = daysInMonth.map((date, index) => {
         const correspondFixture = rows.find(
           (row) =>
@@ -366,6 +427,10 @@ export class FixturesService {
     }
   }
 
+  /**
+   * Get fixture record by id with lock.
+   * @throws {Error} sql related error.
+   */
   private async getFixtureByIdWithLock(
     queryRunner: QueryRunner,
     id: number,
@@ -380,6 +445,10 @@ export class FixturesService {
       .getOne();
   }
 
+  /**
+   * Get fixture record by id.
+   * @throws {Error} sql related error.
+   */
   private getFixtureById(id: number): Promise<Fixture> {
     return this.fixtureRepository
       .createQueryBuilder('fixture')

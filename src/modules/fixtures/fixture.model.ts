@@ -29,6 +29,7 @@ export class Fixture {
   @Index()
   public deletedAt: Date | null;
 
+  // TODO: seperating tournament table.
   @ApiProperty()
   @Column({ length: 100, collation: 'utf8mb4_unicode_ci' })
   public tournamentName: string;

@@ -49,9 +49,9 @@ export class FixturesController {
   }
 
   /**
-   * 'Check whether fixtures exist in a specify year, month, day',
+   * 'Check whether at least a fixture start on specified year, month, day.
    */
-  @Get('/checkStartOnDay')
+  @Get('/check-start-on-day')
   @ApiOkResponse({ type: Boolean })
   @ApiBadRequestResponse()
   @ApiInternalServerErrorResponse()
@@ -67,7 +67,7 @@ export class FixturesController {
   /**
    * Check whether fixtures exist in days range (one month instead),
    */
-  @Get('/checkStartOnDaysInMonth')
+  @Get('/check-start-on-days-in-month')
   @ApiOkResponse({ type: [Boolean] })
   @ApiBadRequestResponse()
   @ApiInternalServerErrorResponse()
