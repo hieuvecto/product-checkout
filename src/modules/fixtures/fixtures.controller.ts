@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  HttpStatus,
   Param,
   Post,
   Put,
@@ -14,8 +13,8 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiOperation,
   ApiQuery,
-  ApiResponse,
 } from '@nestjs/swagger';
 import { CheckFixturesQueryInput } from './dto/check_fixtures_query_input.dto';
 import { CreateFixtureInput } from './dto/create_fixture_input.dto';
@@ -42,16 +41,21 @@ export class FixturesController {
   }
 
   @Get()
+  @ApiOperation({
+    summary:
+      'Get the fixture records with specified params. (FOR FIXTURE LISTING FEATURE).',
+  })
   @ApiOkResponse({ type: [Fixture] })
   @ApiInternalServerErrorResponse()
   async getFixtures(@Query() queries: FixturesQueryInput): Promise<Fixture[]> {
     return this.fixturesService.getFixtures(queries);
   }
 
-  /**
-   * 'Check whether at least a fixture start on specified year, month, day.
-   */
   @Get('/check-start-on-day')
+  @ApiOperation({
+    summary:
+      'Check whether at least a fixture start on specified year, month, day. (FOR FIXTURE LISTING FEATURE)',
+  })
   @ApiOkResponse({ type: Boolean })
   @ApiBadRequestResponse()
   @ApiInternalServerErrorResponse()
@@ -68,6 +72,10 @@ export class FixturesController {
    * Check whether fixtures exist in days range (one month instead),
    */
   @Get('/check-start-on-days-in-month')
+  @ApiOperation({
+    summary:
+      'Check whether Fixtures start on each day in one month. (FOR FIXTURE CALENDAR FEATURE).',
+  })
   @ApiOkResponse({ type: [Boolean] })
   @ApiBadRequestResponse()
   @ApiInternalServerErrorResponse()

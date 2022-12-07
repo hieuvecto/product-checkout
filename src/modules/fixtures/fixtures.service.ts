@@ -343,7 +343,7 @@ export class FixturesService {
   }
 
   /**
-   * Check whether Fixtures start on each day one month. For querying once instead of many queries
+   * Check whether Fixtures start on each day in one month. For querying once instead of many queries
    * when opening the calendar.
    * @param {CheckFixturesQueryInput} args - year, month are required
    * @return {Boolean}
