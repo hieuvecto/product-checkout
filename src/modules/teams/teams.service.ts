@@ -27,6 +27,13 @@ export class TeamsService {
 
   private readonly logger = new Logger(TeamsService.name);
 
+  /**
+   * Create team.
+   * @param {CreateFixtureInput} args - body input fields such as name, displayName, iconImageUrl.
+   * @return {Team} Team record.
+   * @throws {HttpException} - Http exception with status code = 400.
+   * @throws {Error} - Internal server error.
+   */
   async createTeam({
     name,
     displayName,
@@ -68,6 +75,13 @@ export class TeamsService {
     }
   }
 
+  /**
+   * Get specific team record.
+   * @param {TeamParamInput} {name} - name of team record.
+   * @return {Team} Team record.
+   * @throws {HttpException} - Http exception with status code = 404.
+   * @throws {Error} - Internal server error.
+   */
   async getTeam({ name }: TeamParamInput): Promise<Team> {
     const qb = this.teamRepository.createQueryBuilder('team').where({
       name,
@@ -90,6 +104,12 @@ export class TeamsService {
     }
   }
 
+  /**
+   * Get the array of team records with specified parameters.
+   * @param {TeamsQueryInput} args - query input fields such as offset, limit.
+   * @return {Team[]} Team records.
+   * @throws {Error} - Internal server error.
+   */
   async getTeams({ limit, offset }: TeamsQueryInput): Promise<Team[]> {
     const qb = this.teamRepository
       .createQueryBuilder('team')
@@ -105,6 +125,14 @@ export class TeamsService {
     });
   }
 
+  /**
+   * Update the team record
+   * @param {TeamParamInput} {name} - name of team record.
+   * @param {UpdateTeamInput} args - body input fields such as displayName, iconImageUrl.
+   * @return {Team} Team record.
+   * @throws {HttpException} - Http exception with status code = 404.
+   * @throws {Error} - Internal server error.
+   */
   async updateTeam(
     { name }: TeamParamInput,
     args: UpdateTeamInput,
@@ -143,6 +171,13 @@ export class TeamsService {
     }
   }
 
+  /**
+   * Set the deleted_at field of team record to be now()
+   * @param {TeamParamInput} {name} - name of team record.
+   * @return {Boolean}
+   * @throws {HttpException} - Http exception with status code = 404.
+   * @throws {Error} - Internal server error.
+   */
   async deleteTeam({ name }: TeamParamInput): Promise<boolean> {
     const queryRunner = await this.transaction
       .startTransaction()
@@ -177,6 +212,10 @@ export class TeamsService {
     }
   }
 
+  /**
+   * Get team records by ids with lock.
+   * @throws {Error} sql, db related error.
+   */
   public async getTeamsByIdsWithLock(
     queryRunner: QueryRunner,
     ids: number[],
@@ -191,6 +230,10 @@ export class TeamsService {
       .getMany();
   }
 
+  /**
+   * Get a team record by its name.
+   * @throws {Error} sql, db related error.
+   */
   private async getTeamByName(name: string): Promise<Team> {
     return this.teamRepository
       .createQueryBuilder('team')
@@ -200,6 +243,10 @@ export class TeamsService {
       .getOne();
   }
 
+  /**
+   * Get a team record by its name with lock.
+   * @throws {Error} sql, db related error.
+   */
   private async getTeamByNameWithLock(
     queryRunner: QueryRunner,
     name: string,

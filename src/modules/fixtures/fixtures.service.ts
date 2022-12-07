@@ -428,8 +428,8 @@ export class FixturesService {
   }
 
   /**
-   * Get fixture record by id with lock.
-   * @throws {Error} sql related error.
+   * Get a fixture record by id with lock.
+   * @throws {Error} sql, db related error.
    */
   private async getFixtureByIdWithLock(
     queryRunner: QueryRunner,
@@ -446,8 +446,8 @@ export class FixturesService {
   }
 
   /**
-   * Get fixture record by id.
-   * @throws {Error} sql related error.
+   * Get a fixture record by id.
+   * @throws {Error} sql, db related error.
    */
   private getFixtureById(id: number): Promise<Fixture> {
     return this.fixtureRepository
