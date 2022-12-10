@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, Matches, MaxLength } from 'class-validator';
 
-export class CreateTeamInput {
+export class CreateCustomerInput {
   @ApiProperty({
-    description: 'The name of team. REGEX rule: /^[0-9a-zA-Z_-]{6,32}$/ .',
+    description: 'The name of customer. REGEX rule: /^[0-9a-zA-Z_-]{6,32}$/ .',
     maxLength: 32,
-    example: 'manchester-city',
+    example: 'microsoft',
   })
   @IsString()
   @IsNotEmpty()
@@ -15,7 +15,7 @@ export class CreateTeamInput {
 
   @ApiProperty({
     maxLength: 32,
-    example: 'Manchester City',
+    example: 'Microsoft',
   })
   @IsString()
   @IsNotEmpty()

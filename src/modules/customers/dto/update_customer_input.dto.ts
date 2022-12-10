@@ -1,16 +1,10 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Matches,
-  MaxLength,
-} from 'class-validator';
+import { IsOptional, IsString, MaxLength } from 'class-validator';
 
-export class UpdateTeamInput {
+export class UpdateCustomerInput {
   @ApiPropertyOptional({
     maxLength: 32,
-    example: 'Manchester City',
+    example: 'Microsoft',
   })
   @IsOptional()
   @IsString()

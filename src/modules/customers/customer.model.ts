@@ -8,10 +8,11 @@ import {
   PrimaryGeneratedColumn,
   OneToMany,
 } from 'typeorm';
-import { Fixture } from '../fixtures/fixture.model';
+import { DealPricingRule } from '../deal_pricing_rules/deal_pricing_rule.model';
+import { DiscountPricingRule } from '../discount_pricing_rules/discount_pricing_rule.model';
 
 @Entity()
-export class Team {
+export class Customer {
   @ApiProperty()
   @PrimaryGeneratedColumn()
   readonly id?: number;
@@ -41,9 +42,9 @@ export class Team {
   @Column({ nullable: true })
   public iconImageUrl: string | null;
 
-  @OneToMany((type) => Fixture, (fixture) => fixture.homeTeamId)
-  readonly homeFixtures: Fixture[];
+  @OneToMany((type) => DealPricingRule, (rule) => rule.customer)
+  readonly dealPricingRules: DealPricingRule[];
 
-  @OneToMany((type) => Fixture, (fixture) => fixture.awayTeamId)
-  readonly awayFixtures: Fixture[];
+  @OneToMany((type) => DiscountPricingRule, (rule) => rule.customer)
+  readonly discountPricingRules: DiscountPricingRule[];
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository, getRepositoryToken } from '@nestjs/typeorm';
-import { Fixture } from 'src/modules/fixtures/fixture.model';
-import { Team } from 'src/modules/teams/team.model';
+import { Customer } from 'src/modules/customers/customer.model';
+import { Item } from 'src/modules/items/item.model';
 import { EntityManager, QueryRunner, Repository } from 'typeorm';
 
 class MockEntityManager extends EntityManager {
@@ -12,9 +12,9 @@ class MockEntityManager extends EntityManager {
 
   private getMockRepository(entity) {
     if (entity.hasOwnProperty('name') && entity.hasOwnProperty('displayName')) {
-      return this.mockRepositories.get('Team');
-    } else if (entity.hasOwnProperty('tournamentName')) {
-      return this.mockRepositories.get('Fixture');
+      return this.mockRepositories.get('Customer');
+    } else if (entity.hasOwnProperty('value')) {
+      return this.mockRepositories.get('Item');
     }
 
     return null;
@@ -66,21 +66,21 @@ export class MockQueryRunner {
 @Injectable()
 export class MockTransactionService {
   constructor(
-    @InjectRepository(Team)
-    private readonly teamRepository: Repository<Team>,
-    @InjectRepository(Fixture)
-    private readonly fixtureRepository: Repository<Fixture>,
+    @InjectRepository(Customer)
+    private readonly customerRepository: Repository<Customer>,
+    @InjectRepository(Item)
+    private readonly itemRepository: Repository<Item>,
   ) {}
 
   static NullRepositories = [
-    { provide: getRepositoryToken(Team), useValue: null },
-    { provide: getRepositoryToken(Fixture), useValue: null },
+    { provide: getRepositoryToken(Customer), useValue: null },
+    { provide: getRepositoryToken(Item), useValue: null },
   ];
 
   startTransaction = jest.fn(async (): Promise<QueryRunner> => {
     const mockRepositories = new Map<string, any>();
-    mockRepositories.set('Team', this.teamRepository);
-    mockRepositories.set('Fixture', this.fixtureRepository);
+    mockRepositories.set('Customer', this.customerRepository);
+    mockRepositories.set('Item', this.itemRepository);
     const queryRunner = new MockQueryRunner(mockRepositories) as QueryRunner;
     (<any>queryRunner).isTransactionActive = true;
     return queryRunner;
