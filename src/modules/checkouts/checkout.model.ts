@@ -15,10 +15,7 @@ import {
 import { Customer } from '../customers/customer.model';
 import { Item } from '../items/item.model';
 import { PricingRule } from '../pricing_rules/pricing_rule.model';
-import {
-  CheckoutInterface,
-  CheckoutInterfaceWithConstructor,
-} from './checkout.model.interface';
+import { CheckoutInterface } from './checkout.model.interface';
 
 export enum CheckoutStatus {
   unpaid = 'unpaid',
@@ -29,27 +26,27 @@ export enum CheckoutStatus {
 
 @Entity()
 export class Checkout implements CheckoutInterface {
-  constructor(pricingRules: PricingRule[]) {
-    if (pricingRules.length === 0) {
-      throw new Error('pricingRules must not be empty');
-    }
-
-    this.pricingRules = pricingRules;
-    // check if this.pricingRules are all from the same customer
+  /**
+   * Cannot overriding the constructor (If so, break the framework flow). Thus make static function instead.
+   * I think the pseudo codes maybe not restricted, therefore i add customerId as an extra parameter.
+   */
+  static create(
+    customerId: number,
+    pricingRules: PricingRule[],
+  ): CheckoutInterface {
+    // check if pricingRules are all from the same customer
     if (
-      !this.pricingRules.every(
-        (rule) => rule.customerId === this.pricingRules[0].customerId,
-      )
+      pricingRules.length > 0 &&
+      !pricingRules.every((rule) => rule.customerId === customerId)
     ) {
       throw new Error('pricingRules must be from the same customer');
     }
-  }
 
-  static create(
-    constructor: CheckoutInterfaceWithConstructor,
-    pricingRules: PricingRule[],
-  ): CheckoutInterface {
-    return new constructor(pricingRules);
+    const checkout = new Checkout();
+    (<any>checkout.pricingRules) = pricingRules;
+    (<any>checkout.customerId) = customerId;
+
+    return checkout;
   }
 
   @ApiProperty()

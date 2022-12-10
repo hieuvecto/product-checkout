@@ -72,7 +72,7 @@ export class CheckoutsService {
       );
 
       // Flow following by the pseudo code of specification.
-      const checkout = Checkout.create(Checkout, pricingRules) as Checkout;
+      const checkout = Checkout.create(customer.id, pricingRules) as Checkout;
       checkout.batchAdd(items);
       checkout.total();
 

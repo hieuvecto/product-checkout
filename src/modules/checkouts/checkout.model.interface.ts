@@ -6,7 +6,3 @@ export interface CheckoutInterface {
   batchAdd(items: Item[]): void;
   total(): void;
 }
-
-export interface CheckoutInterfaceWithConstructor {
-  new (pricingRules: PricingRule[]): CheckoutInterface;
-}
