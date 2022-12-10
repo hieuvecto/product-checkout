@@ -1,10 +1,10 @@
 import { Module, HttpModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CheckoutsModule } from 'src/modules/checkouts/checkouts.module';
 import { CustomersModule } from 'src/modules/customers/customers.module';
-import { DealPricingRulesModule } from 'src/modules/deal_pricing_rules/deal_pricing_rules.module';
-import { DiscountPricingRulesModule } from 'src/modules/discount_pricing_rules/discount_pricing_rules.module';
 import { ItemsModule } from 'src/modules/items/items.module';
+import { PricingRulesModule } from 'src/modules/pricing_rules/pricing_rules.module';
 import { getConnectionOptions } from 'typeorm';
 import configuration from '../config/configuration';
 
@@ -14,8 +14,8 @@ const ENV = process.env.NODE_ENV;
   imports: [
     CustomersModule,
     ItemsModule,
-    DealPricingRulesModule,
-    DiscountPricingRulesModule,
+    PricingRulesModule,
+    CheckoutsModule,
     TypeOrmModule.forRootAsync({
       useFactory: async () => getConnectionOptions('default'),
     }),

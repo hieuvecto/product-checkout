@@ -9,9 +9,10 @@ import {
   Column,
   PrimaryGeneratedColumn,
   OneToMany,
+  ManyToMany,
 } from 'typeorm';
-import { DealPricingRule } from '../deal_pricing_rules/deal_pricing_rule.model';
-import { DiscountPricingRule } from '../discount_pricing_rules/discount_pricing_rule.model';
+import { Checkout } from '../checkouts/checkout.model';
+import { PricingRule } from '../pricing_rules/pricing_rule.model';
 
 @Entity()
 export class Item {
@@ -32,13 +33,8 @@ export class Item {
   public deletedAt: Date | null;
 
   @ApiProperty()
-  @Column({ length: 32 })
-  @Index({ unique: true })
-  public name: string;
-
-  @ApiProperty()
   @Column({ length: 32, collation: 'utf8mb4_unicode_ci' })
-  public displayName: string;
+  public title: string;
 
   @ApiProperty()
   @Column({ length: 4096, nullable: true, collation: 'utf8mb4_unicode_ci' })
@@ -48,9 +44,9 @@ export class Item {
   @Index()
   public value: BigNumber;
 
-  @OneToMany((type) => DealPricingRule, (rule) => rule.item)
-  readonly dealPricingRules: DealPricingRule[];
+  @OneToMany((type) => PricingRule, (rule) => rule.item)
+  readonly pricingRules: PricingRule[];
 
-  @OneToMany((type) => DiscountPricingRule, (rule) => rule.item)
-  readonly discountPricingRules: DiscountPricingRule[];
+  @ManyToMany((type) => Checkout, (checkout) => checkout.items)
+  public checkouts: Checkout[];
 }

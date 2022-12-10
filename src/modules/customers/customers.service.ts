@@ -240,7 +240,7 @@ export class CustomersService {
    * Get a customer record by its name.
    * @throws {Error} sql, db related error.
    */
-  private async getCustomerByName(name: string): Promise<Customer> {
+  public async getCustomerByName(name: string): Promise<Customer> {
     return this.customerRepository
       .createQueryBuilder('customer')
       .useTransaction(false)
