@@ -15,7 +15,7 @@ export class CheckoutsQueryInput extends PaginateQueryInput {
   })
   @IsOptional()
   @IsEnum(CheckoutsOrderBy)
-  orderBy: CheckoutsOrderBy = CheckoutsOrderBy.confirmedAt;
+  orderBy: CheckoutsOrderBy = CheckoutsOrderBy.createdAt;
 
   @ApiPropertyOptional({
     enum: [...Object.values(BooleanEnum)],

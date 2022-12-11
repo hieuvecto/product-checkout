@@ -13,6 +13,7 @@ import {
   Column,
   ManyToOne,
   ManyToMany,
+  Unique,
 } from 'typeorm';
 import { Checkout } from '../checkouts/checkout.model';
 import { Customer } from '../customers/customer.model';
@@ -23,7 +24,13 @@ export enum PricingRuleType {
   discount = 'discount',
 }
 
+/**
+ * @Unique(['customerId', 'itemId']):
+ * To prevent duplicate pricing rules, chaining multiple types on the same item is not allowed currently
+ * But maybe in the future, we can allow it
+ */
 @Entity()
+@Unique(['customerId', 'itemId'])
 export class PricingRule {
   @ApiProperty()
   @PrimaryGeneratedColumn('increment')
