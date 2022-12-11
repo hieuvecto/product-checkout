@@ -11,6 +11,11 @@ import {
 import { Checkout } from '../checkouts/checkout.model';
 import { PricingRule } from '../pricing_rules/pricing_rule.model';
 
+export enum CustomerType {
+  default = 'default',
+  privileged = 'privileged',
+}
+
 @Entity()
 export class Customer {
   @ApiProperty()
@@ -41,6 +46,14 @@ export class Customer {
   @ApiProperty()
   @Column({ nullable: true })
   public iconImageUrl: string | null;
+
+  @Column({
+    type: 'enum',
+    enum: CustomerType,
+    default: CustomerType.default,
+  })
+  @Index()
+  public type: CustomerType = CustomerType.default;
 
   @OneToMany((type) => PricingRule, (rule) => rule.customer)
   readonly pricingRules: PricingRule[];

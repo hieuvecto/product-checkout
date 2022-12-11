@@ -19,6 +19,7 @@ import {
 } from './dto/checkouts_query_input.dto';
 import { CheckoutParamInput } from './dto/checkout_param_input.dto';
 import { CreateCheckoutInput } from './dto/create_checkout_input.dto';
+import { PayCheckoutInput } from './dto/pay_checkout_input.dto';
 
 @Injectable()
 export class CheckoutsService {
@@ -177,11 +178,15 @@ export class CheckoutsService {
   /**
    * Pay checkout.
    * @param {CheckoutParamInput} {id} - id of checkout record.
+   * @param {PayCheckoutInput} args - body input fields such as value.
    * @return {Checkout} Checkout record.
    * @throws {HttpException} - Http exception with status code = 404.
    * @throws {Error} - Internal server error.
    */
-  public async payCheckout({ id }: CheckoutParamInput): Promise<Checkout> {
+  public async payCheckout(
+    { id }: CheckoutParamInput,
+    { value }: PayCheckoutInput,
+  ): Promise<Checkout> {
     const queryRunner = await this.transaction
       .startTransaction()
       .catch(async (e) => {
@@ -196,6 +201,9 @@ export class CheckoutsService {
       );
       if (!checkout) {
         throw new HttpException('Checkout not found.', HttpStatus.NOT_FOUND);
+      }
+      if (!checkout.totalValue.isEqualTo(value)) {
+        throw new HttpException('Invalid value.', HttpStatus.BAD_REQUEST);
       }
 
       /** Specific payment logic */

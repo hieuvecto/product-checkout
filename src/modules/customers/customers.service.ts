@@ -38,6 +38,7 @@ export class CustomersService {
     name,
     displayName,
     iconImageUrl,
+    type,
   }: CreateCustomerInput): Promise<Customer> {
     const queryRunner = await this.transaction
       .startTransaction()
@@ -59,6 +60,7 @@ export class CustomersService {
         name,
         displayName,
         iconImageUrl,
+        type,
       });
 
       await queryRunner.manager.save(customer, { reload: true });
@@ -159,6 +161,7 @@ export class CustomersService {
 
       customer.displayName = args.displayName ?? customer.displayName;
       customer.iconImageUrl = args.iconImageUrl ?? customer.iconImageUrl;
+      customer.type = args.type ?? customer.type;
 
       await queryRunner.manager.save(customer, { reload: false });
 

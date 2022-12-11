@@ -11,6 +11,7 @@ import { Checkout } from './checkout.model';
 import { CreateCheckoutInput } from './dto/create_checkout_input.dto';
 import { CheckoutParamInput } from './dto/checkout_param_input.dto';
 import { CheckoutsQueryInput } from './dto/checkouts_query_input.dto';
+import { PayCheckoutInput } from './dto/pay_checkout_input.dto';
 
 @Controller({
   path: 'checkouts',
@@ -55,8 +56,11 @@ export class CheckoutsController {
   @ApiOkResponse({ type: Checkout })
   @ApiNotFoundResponse()
   @ApiInternalServerErrorResponse()
-  async payCheckout(@Param() params: CheckoutParamInput): Promise<Checkout> {
-    return this.checkoutsService.payCheckout(params);
+  async payCheckout(
+    @Param() params: CheckoutParamInput,
+    @Body() args: PayCheckoutInput,
+  ): Promise<Checkout> {
+    return this.checkoutsService.payCheckout(params, args);
   }
 
   @Put(':id/confirm')

@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { dollarValueFeeColumnOptions } from 'src/common/typeorm_columns_option/columnOptions';
+import { centValueFeeColumnOptions } from 'src/common/typeorm_columns_option/columnOptions';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -63,7 +63,7 @@ export class PricingRule {
   /** End of deal pricing rule */
 
   /** Discount pricing rule */
-  @Column(dollarValueFeeColumnOptions)
+  @Column(centValueFeeColumnOptions)
   @Index()
   public discountValue?: BigNumber | null;
   /** End of discount pricing rule */

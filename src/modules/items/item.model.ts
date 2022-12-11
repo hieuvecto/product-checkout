@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import BigNumber from 'bignumber.js';
-import { dollarValueFeeColumnOptions } from 'src/common/typeorm_columns_option/columnOptions';
+import { centValueFeeColumnOptions } from 'src/common/typeorm_columns_option/columnOptions';
 import {
   Entity,
   CreateDateColumn,
@@ -40,7 +40,7 @@ export class Item {
   @Column({ length: 4096, nullable: true, collation: 'utf8mb4_unicode_ci' })
   public description: string | null;
 
-  @Column(dollarValueFeeColumnOptions)
+  @Column(centValueFeeColumnOptions)
   @Index()
   public value: BigNumber;
 

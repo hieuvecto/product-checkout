@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import BigNumber from 'bignumber.js';
-import { dollarValueFeeColumnOptions } from 'src/common/typeorm_columns_option/columnOptions';
+import { centValueFeeColumnOptions } from 'src/common/typeorm_columns_option/columnOptions';
 import {
   Entity,
   CreateDateColumn,
@@ -71,7 +71,7 @@ export class Checkout implements CheckoutInterface {
   @ManyToOne((type) => Customer, (customer) => customer.checkouts)
   readonly customer: Customer;
 
-  @Column(dollarValueFeeColumnOptions)
+  @Column(centValueFeeColumnOptions)
   @Index()
   public totalValue: BigNumber;
 

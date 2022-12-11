@@ -1,5 +1,13 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, Matches, MaxLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+} from 'class-validator';
+import { CustomerType } from '../customer.model';
 
 export class CreateCustomerInput {
   @ApiProperty({
@@ -32,4 +40,11 @@ export class CreateCustomerInput {
   @IsString()
   @MaxLength(255)
   iconImageUrl: string;
+
+  @ApiPropertyOptional({
+    enum: [...Object.values(CustomerType)],
+  })
+  @IsOptional()
+  @IsEnum(CustomerType)
+  type?: CustomerType;
 }
