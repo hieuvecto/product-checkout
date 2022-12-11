@@ -35,7 +35,7 @@ export enum CheckoutStatus {
 type ProcessingCheckoutItem = Pick<
   CheckoutItem,
   'itemId' | 'item' | 'quantity'
-> & { computedValue: BigNumber; discountedValue?: BigNumber };
+> & { totalValue: BigNumber; discountedValue?: BigNumber };
 
 @Entity()
 export class Checkout implements CheckoutInterface {
@@ -85,10 +85,17 @@ export class Checkout implements CheckoutInterface {
   @ManyToOne((type) => Customer, (customer) => customer.checkouts)
   readonly customer: Customer;
 
-  @ApiProperty()
+  @ApiProperty({ description: 'The value before applying the pricing rules' })
   @Column(centValueFeeColumnOptions)
   @Index()
   public totalValue: BigNumber;
+
+  @ApiProperty({
+    description: 'The value after applying the pricing rules',
+  })
+  @Column(centValueFeeColumnOptions)
+  @Index()
+  public discountedValue: BigNumber;
 
   @ManyToMany((type) => PricingRule, (rule) => rule.checkouts)
   @JoinTable()
@@ -146,7 +153,7 @@ export class Checkout implements CheckoutInterface {
         }
         return {
           ...ci,
-          computedValue: ci.item.price.multipliedBy(ci.quantity),
+          totalValue: ci.item.price.multipliedBy(ci.quantity),
         } as ProcessingCheckoutItem;
       });
     for (const pr of this.pricingRules) {
@@ -159,7 +166,7 @@ export class Checkout implements CheckoutInterface {
       }
 
       // apply pricing rule
-      // TODO: add extra columns in the checkouts_pricing_rules table to store the detail of applied rule
+      // TODO: add extra columns in the checkouts_pricing_rules table to store the detail of applied rules
       switch (pr.type) {
         case PricingRuleType.deal: {
           if (!pr.fromQuantity || !pr.toQuantity) {
@@ -193,11 +200,15 @@ export class Checkout implements CheckoutInterface {
 
     // calculate total value
     this.totalValue = clonedCheckoutItems.reduce<BigNumber>((prev, cur) => {
-      if (cur.discountedValue) {
-        return prev.plus(cur.discountedValue);
-      }
-      return prev.plus(cur.computedValue);
+      return prev.plus(cur.totalValue);
     }, new BigNumber(0));
+    // calculate discounted value
+    this.discountedValue = clonedCheckoutItems.reduce<BigNumber>(
+      (prev, cur) => {
+        return prev.plus(cur.discountedValue || cur.totalValue);
+      },
+      new BigNumber(0),
+    );
   }
 
   public batchAdd(itemsWithQuantities: ItemWithQuantity[]): void {

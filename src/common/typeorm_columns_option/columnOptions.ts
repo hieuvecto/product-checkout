@@ -4,7 +4,7 @@ import {
   getNotNaNString,
 } from '../scalars/unsigned_big_number.scalar';
 
-export const centValueFeeColumnOptions: ColumnOptions = {
+const baseCentValueFeeColumnOptions: ColumnOptions = {
   type: 'decimal',
   precision: 16,
   scale: 0,
@@ -12,4 +12,12 @@ export const centValueFeeColumnOptions: ColumnOptions = {
     from: (v) => getNotNaNBigNumber(v),
     to: (v) => getNotNaNString(v),
   },
+};
+
+export const centValueFeeColumnOptions: ColumnOptions = {
+  ...baseCentValueFeeColumnOptions,
+};
+export const nullableCentValueFeeColumnOptions: ColumnOptions = {
+  ...baseCentValueFeeColumnOptions,
+  nullable: true,
 };

@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import BigNumber from 'bignumber.js';
-import { centValueFeeColumnOptions } from 'src/common/typeorm_columns_option/columnOptions';
+import {
+  centValueFeeColumnOptions,
+  nullableCentValueFeeColumnOptions,
+} from 'src/common/typeorm_columns_option/columnOptions';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -71,7 +74,7 @@ export class PricingRule {
 
   /** Discount pricing rule */
   @ApiProperty()
-  @Column(centValueFeeColumnOptions)
+  @Column(nullableCentValueFeeColumnOptions)
   public discountPrice?: BigNumber | null;
   /** End of discount pricing rule */
 
