@@ -24,8 +24,8 @@ yarn start:app:dev
 
 # Api docs:
 
-- After the app starting up, access http://localhost:3000/api to see the swagger docs.
-- Import Fixture_management.postman_collection.json for Postman predefined collection.
+- After the app starting up, access http://localhost:3001/api to see the swagger docs.
+- You can test api directly in swagger docs.
 
 # Db diagram:
 
