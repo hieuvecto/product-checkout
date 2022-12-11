@@ -101,7 +101,7 @@ export class Checkout implements CheckoutInterface {
   @JoinTable()
   readonly pricingRules: PricingRule[];
 
-  @ApiProperty()
+  @ApiProperty({ enum: [...Object.values(CheckoutStatus)] })
   @Column({
     type: 'enum',
     enum: CheckoutStatus,

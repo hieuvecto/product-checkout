@@ -24,6 +24,7 @@ export class ItemIdWithQuantity {
   itemId: number;
 
   @ApiProperty({
+    description: 'quantity must greater than 0 and less than or equal to 1000.',
     example: 10,
   })
   @IsNotEmpty()
@@ -44,7 +45,10 @@ export class CreateCheckoutInput {
   @Matches(/^[0-9a-zA-Z_\-]{6,32}$/)
   customerName: string;
 
-  @ApiProperty({ type: [ItemIdWithQuantity] })
+  @ApiProperty({
+    type: [ItemIdWithQuantity],
+    description: 'Item ids must be unique.',
+  })
   @IsArray()
   @ValidateNested({ each: true })
   @ArrayMaxSize(99)
