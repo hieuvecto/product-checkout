@@ -23,7 +23,7 @@ export class CheckoutsController {
   @Post()
   @ApiOperation({
     summary:
-      'Create the temporary checkout. (status = unpaid) (Has the lines which flow following by the pseudo codes of specification.',
+      'Create the temporary checkout. (status = unpaid) (Has the lines which the flow follows the pseudo codes of specification).',
   })
   @ApiOkResponse({ type: Checkout })
   @ApiNotFoundResponse()
@@ -67,7 +67,7 @@ export class CheckoutsController {
   @Put(':id/confirm')
   @ApiOperation({
     summary:
-      'Confirm the checkout by batch job or admin (Depends on specific requirements). Set status = confirmed).',
+      'Confirm the checkout by batch job or admin (Depends on specific requirements). Set status = confirmed.',
   })
   @ApiOkResponse({ type: Checkout })
   @ApiNotFoundResponse()
@@ -81,7 +81,7 @@ export class CheckoutsController {
   @Put(':id/cancel')
   @ApiOperation({
     summary:
-      'Cancel unconfirmed checkout by batch job or admin (Depends on specific requirements).',
+      'Cancel unconfirmed checkout by batch job or admin (Depends on specific requirements). Set status = canceled.',
   })
   @ApiOkResponse({ type: Checkout })
   @ApiNotFoundResponse()

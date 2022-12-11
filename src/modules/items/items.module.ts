@@ -4,6 +4,7 @@ import { TransactionService } from 'src/common/transaction/transaction.service';
 import { Item } from './item.model';
 import { ItemsService } from './items.service';
 
+// TODO: implement CRUD for items.
 @Module({
   imports: [TypeOrmModule.forFeature([Item])],
   providers: [
