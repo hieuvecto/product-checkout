@@ -103,16 +103,19 @@ export class CheckoutsService {
       );
       checkout.total();
 
-      checkout.checkoutItems = checkout.checkoutItems.map((checkoutItem) =>
-        this.checkoutItemRepository.create(checkoutItem),
-      );
-      const checkoutModel = this.checkoutRepository.create(checkout);
-
       /**
        * No need to save pricingRules mapping in a seperated joined table,
        * but to fit the pseudo code of specification, I save it.
        */
+      const checkoutModel = this.checkoutRepository.create(checkout);
       await queryRunner.manager.save(checkoutModel, { reload: true });
+      checkout.checkoutItems = checkout.checkoutItems.map((checkoutItem) =>
+        this.checkoutItemRepository.create({
+          ...checkoutItem,
+          checkoutId: checkoutModel.id,
+        }),
+      );
+      await queryRunner.manager.save(checkout.checkoutItems, { reload: true });
 
       await this.transaction.commit(queryRunner);
       return checkoutModel;

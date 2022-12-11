@@ -44,7 +44,7 @@ export class CreateCheckoutInput {
   @Matches(/^[0-9a-zA-Z_\-]{6,32}$/)
   customerName: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: [ItemIdWithQuantity] })
   @IsArray()
   @ValidateNested({ each: true })
   @ArrayMaxSize(99)

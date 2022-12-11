@@ -12,5 +12,4 @@ export const centValueFeeColumnOptions: ColumnOptions = {
     from: (v) => getNotNaNBigNumber(v),
     to: (v) => getNotNaNString(v),
   },
-  nullable: true,
 };

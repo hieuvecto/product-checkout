@@ -7,10 +7,11 @@ import { PricingRulesModule } from '../pricing_rules/pricing_rules.module';
 import { Checkout } from './checkout.model';
 import { CheckoutsController } from './checkouts.controller';
 import { CheckoutsService } from './checkouts.service';
+import { CheckoutItem } from './checkouts_items.model';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Checkout]),
+    TypeOrmModule.forFeature([Checkout, CheckoutItem]),
     CustomersModule,
     PricingRulesModule,
     ItemsModule,
