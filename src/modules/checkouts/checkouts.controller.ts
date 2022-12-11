@@ -26,6 +26,7 @@ export class CheckoutsController {
       'Create the temporary checkout. (status = unpaid) (Has the lines which flow following by the pseudo codes of specification.',
   })
   @ApiOkResponse({ type: Checkout })
+  @ApiNotFoundResponse()
   @ApiBadRequestResponse()
   @ApiInternalServerErrorResponse()
   async createCheckout(@Body() args: CreateCheckoutInput): Promise<Checkout> {

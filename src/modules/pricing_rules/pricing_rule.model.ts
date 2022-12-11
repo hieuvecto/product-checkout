@@ -64,7 +64,6 @@ export class PricingRule {
 
   /** Discount pricing rule */
   @Column(centValueFeeColumnOptions)
-  @Index()
   public discountValue?: BigNumber | null;
   /** End of discount pricing rule */
 

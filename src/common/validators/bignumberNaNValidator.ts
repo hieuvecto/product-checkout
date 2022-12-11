@@ -16,7 +16,7 @@ export function isNotNaNBigNumber(value: any) {
 export function IsNotNaNBigNumber(validationOptions?: ValidationOptions) {
   return function (object: any, propertyName: string) {
     registerDecorator({
-      name: 'isTelephone',
+      name: 'IsNotNaNBigNumber',
       target: object.constructor,
       propertyName,
       constraints: [],

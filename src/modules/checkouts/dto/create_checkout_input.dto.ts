@@ -4,12 +4,33 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
+  IsInt,
   IsNotEmpty,
+  IsPositive,
   IsString,
   Matches,
+  Max,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
+import { MAX_ITEM_BUYING_QUANTITY } from 'src/common/constants/constants';
+
+export class ItemIdWithQuantity {
+  @ApiProperty({
+    example: 1,
+  })
+  @IsNotEmpty()
+  @IsPositive()
+  itemId: number;
+
+  @ApiProperty({
+    example: 10,
+  })
+  @IsNotEmpty()
+  @IsPositive()
+  @Max(MAX_ITEM_BUYING_QUANTITY)
+  quantity: number;
+}
 
 export class CreateCheckoutInput {
   @ApiProperty({
@@ -23,13 +44,10 @@ export class CreateCheckoutInput {
   @Matches(/^[0-9a-zA-Z_\-]{6,32}$/)
   customerName: string;
 
-  @ApiProperty({
-    example: [1, 2, 3],
-  })
+  @ApiProperty()
   @IsArray()
   @ValidateNested({ each: true })
   @ArrayMaxSize(99)
   @ArrayMinSize(1)
-  @Type(() => Number)
-  itemIds: number[];
+  itemIdsWithQuantities: ItemIdWithQuantity[];
 }

@@ -11,7 +11,7 @@ import {
   OneToMany,
   ManyToMany,
 } from 'typeorm';
-import { Checkout } from '../checkouts/checkout.model';
+import { CheckoutItem } from '../checkouts/checkouts_items.model';
 import { PricingRule } from '../pricing_rules/pricing_rule.model';
 
 @Entity()
@@ -44,9 +44,11 @@ export class Item {
   @Index()
   public value: BigNumber;
 
+  // TODO: handle the remaining amount of items
+
   @OneToMany((type) => PricingRule, (rule) => rule.item)
   readonly pricingRules: PricingRule[];
 
-  @ManyToMany((type) => Checkout, (checkout) => checkout.items)
-  public checkouts: Checkout[];
+  @OneToMany((type) => CheckoutItem, (checkoutItem) => checkoutItem.item)
+  readonly checkoutItems: CheckoutItem[];
 }

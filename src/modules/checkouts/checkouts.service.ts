@@ -13,6 +13,7 @@ import { CustomersService } from '../customers/customers.service';
 import { ItemsService } from '../items/items.service';
 import { PricingRulesService } from '../pricing_rules/pricing_rules.service';
 import { Checkout, CheckoutStatus } from './checkout.model';
+import { CheckoutItem } from './checkouts_items.model';
 import {
   CheckoutsOrderBy,
   CheckoutsQueryInput,
@@ -33,6 +34,8 @@ export class CheckoutsService {
 
     @InjectRepository(Checkout)
     private readonly checkoutRepository: Repository<Checkout>,
+    @InjectRepository(CheckoutItem)
+    private readonly checkoutItemRepository: Repository<CheckoutItem>,
   ) {}
 
   private readonly logger = new Logger(CheckoutsService.name);
@@ -41,12 +44,12 @@ export class CheckoutsService {
    * Create checkout.
    * @param {CreateCheckoutInput} args - body input fields such as customerName, itemIds
    * @return {Checkout} Checkout record.
-   * @throws {HttpException} - Http exception with status code = 404.
+   * @throws {HttpException} - Http exception with status code = 400, 404.
    * @throws {Error} - Internal server error.
    */
   async createCheckout({
     customerName,
-    itemIds,
+    itemIdsWithQuantities,
   }: CreateCheckoutInput): Promise<Checkout> {
     const queryRunner = await this.transaction
       .startTransaction()
@@ -62,23 +65,53 @@ export class CheckoutsService {
       if (!customer) {
         throw new HttpException('Customer not found.', HttpStatus.NOT_FOUND);
       }
+
+      // Check unique itemIds in itemIdsWithQuantities.
+      if (
+        itemIdsWithQuantities.length !==
+        new Set(itemIdsWithQuantities.map((element) => element.itemId)).size
+      ) {
+        throw new HttpException(
+          'Item ids must be unique.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      const items = await this.itemsService.getItemsByIdsWithLock(
+        queryRunner,
+        itemIdsWithQuantities.map((element) => element.itemId),
+      );
+      if (items.length !== itemIdsWithQuantities.length) {
+        throw new HttpException('Some Items not found.', HttpStatus.NOT_FOUND);
+      }
+
       const pricingRules =
         await this.pricingRulesService.getPricingRulesByCustomerIdWithLock(
           queryRunner,
           customer.id,
         );
-      const items = await this.itemsService.getItemsByIdsWithLock(
-        queryRunner,
-        itemIds,
-      );
 
-      // Flow following by the pseudo code of specification.
+      // Flow following the pseudo code of specification.
       const checkout = Checkout.create(customer.id, pricingRules) as Checkout;
-      checkout.batchAdd(items);
+      checkout.batchAdd(
+        items.map((item) => {
+          return {
+            item,
+            quantity: itemIdsWithQuantities.find((iq) => iq.itemId === item.id)
+              .quantity,
+          };
+        }),
+      );
       checkout.total();
 
+      checkout.checkoutItems = checkout.checkoutItems.map((checkoutItem) =>
+        this.checkoutItemRepository.create(checkoutItem),
+      );
       const checkoutModel = this.checkoutRepository.create(checkout);
 
+      /**
+       * No need to save pricingRules mapping in a seperated joined table,
+       * but to fit the pseudo code of specification, I save it.
+       */
       await queryRunner.manager.save(checkoutModel, { reload: true });
 
       await this.transaction.commit(queryRunner);

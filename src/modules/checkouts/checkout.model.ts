@@ -11,11 +11,16 @@ import {
   ManyToOne,
   ManyToMany,
   JoinTable,
+  OneToMany,
 } from 'typeorm';
 import { Customer } from '../customers/customer.model';
 import { Item } from '../items/item.model';
 import { PricingRule } from '../pricing_rules/pricing_rule.model';
-import { CheckoutInterface } from './checkout.model.interface';
+import {
+  CheckoutInterface,
+  ItemWithQuantity,
+} from './checkout.model.interface';
+import { CheckoutItem } from './checkouts_items.model';
 
 export enum CheckoutStatus {
   unpaid = 'unpaid',
@@ -75,10 +80,6 @@ export class Checkout implements CheckoutInterface {
   @Index()
   public totalValue: BigNumber;
 
-  @ManyToMany((type) => Item, (item) => item.checkouts)
-  @JoinTable()
-  public items: Item[];
-
   @ManyToMany((type) => PricingRule, (rule) => rule.checkouts)
   @JoinTable()
   readonly pricingRules: PricingRule[];
@@ -99,27 +100,65 @@ export class Checkout implements CheckoutInterface {
   @Index()
   public confirmedAt: Date | null;
 
+  @OneToMany((type) => CheckoutItem, (checkoutItem) => checkoutItem.checkout)
+  public checkoutItems: CheckoutItem[];
+
   public add(item: Item): void {
-    if (!this.items) {
-      this.items = [item];
+    if (!this.checkoutItems) {
+      this.checkoutItems = [
+        { itemId: item.id, item, quantity: 1 } as CheckoutItem,
+      ];
     } else {
-      this.items.push(item);
+      const foundCheckoutsItems = this.checkoutItems.find(
+        (ci) => ci.itemId === item.id,
+      );
+      if (foundCheckoutsItems) {
+        foundCheckoutsItems.quantity += 1;
+      } else {
+        this.checkoutItems.push({
+          itemId: item.id,
+          item,
+          quantity: 1,
+        } as CheckoutItem);
+      }
     }
   }
 
   public total(): void {
     // TODO: Implement total calculation with pricing rules
-    this.totalValue = this.items.reduce(
-      (pre, cur) => pre.plus(cur.value),
+    // TODO: null pointer error handling
+    this.totalValue = this.checkoutItems.reduce(
+      (pre, cur) => pre.plus(cur.item.value),
       BigNumber(0),
     );
   }
 
-  public batchAdd(items: Item[]): void {
-    if (!this.items) {
-      this.items = items;
+  public batchAdd(itemsWithQuantities: ItemWithQuantity[]): void {
+    if (!this.checkoutItems) {
+      this.checkoutItems = [
+        ...itemsWithQuantities.map<CheckoutItem>((iq) => {
+          return {
+            itemId: iq.item.id,
+            item: iq.item,
+            quantity: iq.quantity,
+          } as CheckoutItem;
+        }),
+      ];
     } else {
-      this.items = this.items.concat(items);
+      for (const iq of itemsWithQuantities) {
+        const foundCheckoutsItems = this.checkoutItems.find(
+          (ci) => ci.itemId === iq.item.id,
+        );
+        if (foundCheckoutsItems) {
+          foundCheckoutsItems.quantity += iq.quantity;
+        } else {
+          this.checkoutItems.push({
+            itemId: iq.item.id,
+            item: iq.item,
+            quantity: iq.quantity,
+          } as CheckoutItem);
+        }
+      }
     }
   }
 }

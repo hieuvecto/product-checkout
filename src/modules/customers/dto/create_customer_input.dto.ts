@@ -30,11 +30,10 @@ export class CreateCustomerInput {
   @MaxLength(32)
   displayName: string;
 
-  // TODO: validate url
+  // TODO: validate valid icon image URL
   @ApiProperty({
     maxLength: 255,
-    example:
-      'https://upload.wikimedia.org/wikipedia/vi/1/1d/Manchester_City_FC_logo.svg',
+    example: 'https://avatars.githubusercontent.com/u/6154722?s=280&v=4',
   })
   @IsNotEmpty()
   @IsString()
