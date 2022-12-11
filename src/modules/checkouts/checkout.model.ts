@@ -86,14 +86,14 @@ export class Checkout implements CheckoutInterface {
   readonly customer: Customer;
 
   @ApiProperty({
-    description: 'The value before applying the pricing rules (Cent unit)',
+    description: 'The value before applying the pricing rules (Cent unit ¢)',
   })
   @Column(centValueFeeColumnOptions)
   @Index()
   public totalValue: BigNumber;
 
   @ApiProperty({
-    description: 'The value after applying the pricing rules (Cent unit)',
+    description: 'The value after applying the pricing rules (Cent unit ¢)',
   })
   @Column(centValueFeeColumnOptions)
   @Index()
@@ -121,6 +121,8 @@ export class Checkout implements CheckoutInterface {
   @Column({ nullable: true })
   @Index()
   public confirmedAt: Date | null;
+
+  // TODO: add more columns such as expiredAt, cancelledAt, etc.
 
   @OneToMany((type) => CheckoutItem, (checkoutItem) => checkoutItem.checkout)
   public checkoutItems: CheckoutItem[];

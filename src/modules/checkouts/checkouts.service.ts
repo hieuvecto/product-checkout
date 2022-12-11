@@ -241,7 +241,7 @@ export class CheckoutsService {
       if (!checkout) {
         throw new HttpException('Checkout not found.', HttpStatus.NOT_FOUND);
       }
-      if (!checkout.totalValue.isEqualTo(value)) {
+      if (!checkout.discountedValue.isEqualTo(value)) {
         throw new HttpException('Invalid value.', HttpStatus.BAD_REQUEST);
       }
 

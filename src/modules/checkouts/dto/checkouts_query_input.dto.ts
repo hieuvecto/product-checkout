@@ -24,4 +24,6 @@ export class CheckoutsQueryInput extends PaginateQueryInput {
   @Transform(({ value }) => (value === 'true' ? true : false))
   @IsBoolean()
   asc?: boolean;
+
+  // TODO: add more filters
 }

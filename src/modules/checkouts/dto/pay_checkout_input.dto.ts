@@ -6,7 +6,7 @@ import { IsNotNaNBigNumber } from 'src/common/validators/bignumberNaNValidator';
 
 export class PayCheckoutInput {
   @ApiProperty({
-    description: 'Pay value (Cent unit)',
+    description: 'Pay value (Cent unit ¢)',
     example: '"7196"',
   })
   @IsNotEmpty()
