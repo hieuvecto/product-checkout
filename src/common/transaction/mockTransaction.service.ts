@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository, getRepositoryToken } from '@nestjs/typeorm';
+import { Checkout } from 'src/modules/checkouts/checkout.model';
+import { CheckoutItem } from 'src/modules/checkouts/checkouts_items.model';
 import { Customer } from 'src/modules/customers/customer.model';
 import { Item } from 'src/modules/items/item.model';
 import { EntityManager, QueryRunner, Repository } from 'typeorm';
@@ -13,8 +15,22 @@ class MockEntityManager extends EntityManager {
   private getMockRepository(entity) {
     if (entity.hasOwnProperty('name') && entity.hasOwnProperty('displayName')) {
       return this.mockRepositories.get('Customer');
-    } else if (entity.hasOwnProperty('value')) {
+    } else if (
+      entity.hasOwnProperty('price') &&
+      entity.hasOwnProperty('title') &&
+      entity.hasOwnProperty('description')
+    ) {
       return this.mockRepositories.get('Item');
+    } else if (
+      entity.hasOwnProperty('totalValue') &&
+      entity.hasOwnProperty('discountedValue')
+    ) {
+      return this.mockRepositories.get('Checkout');
+    } else if (
+      entity.hasOwnProperty('itemId') &&
+      entity.hasOwnProperty('quantity')
+    ) {
+      return this.mockRepositories.get('CheckoutItem');
     }
 
     return null;
@@ -70,17 +86,25 @@ export class MockTransactionService {
     private readonly customerRepository: Repository<Customer>,
     @InjectRepository(Item)
     private readonly itemRepository: Repository<Item>,
+    @InjectRepository(Checkout)
+    private readonly checkoutRepository: Repository<Checkout>,
+    @InjectRepository(CheckoutItem)
+    private readonly checkoutItemRepository: Repository<CheckoutItem>,
   ) {}
 
   static NullRepositories = [
     { provide: getRepositoryToken(Customer), useValue: null },
     { provide: getRepositoryToken(Item), useValue: null },
+    { provide: getRepositoryToken(Checkout), useValue: null },
+    { provide: getRepositoryToken(CheckoutItem), useValue: null },
   ];
 
   startTransaction = jest.fn(async (): Promise<QueryRunner> => {
     const mockRepositories = new Map<string, any>();
     mockRepositories.set('Customer', this.customerRepository);
     mockRepositories.set('Item', this.itemRepository);
+    mockRepositories.set('Checkout', this.checkoutRepository);
+    mockRepositories.set('CheckoutItem', this.checkoutItemRepository);
     const queryRunner = new MockQueryRunner(mockRepositories) as QueryRunner;
     (<any>queryRunner).isTransactionActive = true;
     return queryRunner;

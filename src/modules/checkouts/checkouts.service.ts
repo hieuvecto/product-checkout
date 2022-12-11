@@ -59,9 +59,12 @@ export class CheckoutsService {
       });
 
     try {
-      const customer = await this.customerService.getCustomerByName(
+      // Use lock to prevent customer from being deleted by other transactions before this transaction is committed.
+      const customer = await this.customerService.getCustomerByNameWithLock(
+        queryRunner,
         customerName,
       );
+
       if (!customer) {
         throw new HttpException('Customer not found.', HttpStatus.NOT_FOUND);
       }

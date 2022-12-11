@@ -11,6 +11,7 @@ import {
   Matches,
   Max,
   MaxLength,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { MAX_ITEM_BUYING_QUANTITY } from 'src/common/constants/constants';
@@ -53,5 +54,6 @@ export class CreateCheckoutInput {
   @ValidateNested({ each: true })
   @ArrayMaxSize(99)
   @ArrayMinSize(1)
+  @Type(() => ItemIdWithQuantity)
   itemIdsWithQuantities: ItemIdWithQuantity[];
 }

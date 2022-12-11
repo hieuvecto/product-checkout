@@ -41,7 +41,7 @@ export class Item {
   public description: string | null;
 
   @ApiProperty({
-    description: 'The retail price of the item in cents',
+    description: 'The retail price of the item (cent unit)',
     example: '"1000"',
   })
   @Column(centValueFeeColumnOptions)

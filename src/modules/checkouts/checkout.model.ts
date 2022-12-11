@@ -85,13 +85,15 @@ export class Checkout implements CheckoutInterface {
   @ManyToOne((type) => Customer, (customer) => customer.checkouts)
   readonly customer: Customer;
 
-  @ApiProperty({ description: 'The value before applying the pricing rules' })
+  @ApiProperty({
+    description: 'The value before applying the pricing rules (Cent unit)',
+  })
   @Column(centValueFeeColumnOptions)
   @Index()
   public totalValue: BigNumber;
 
   @ApiProperty({
-    description: 'The value after applying the pricing rules',
+    description: 'The value after applying the pricing rules (Cent unit)',
   })
   @Column(centValueFeeColumnOptions)
   @Index()

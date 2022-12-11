@@ -1,6 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import BigNumber from 'bignumber.js';
-import { centValueFeeColumnOptions } from 'src/common/typeorm_columns_option/columnOptions';
 import {
   Entity,
   CreateDateColumn,

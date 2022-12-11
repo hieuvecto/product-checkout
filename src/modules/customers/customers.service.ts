@@ -256,7 +256,7 @@ export class CustomersService {
    * Get a customer record by its name with lock.
    * @throws {Error} sql, db related error.
    */
-  private async getCustomerByNameWithLock(
+  public async getCustomerByNameWithLock(
     queryRunner: QueryRunner,
     name: string,
   ): Promise<Customer> {
