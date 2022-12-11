@@ -36,20 +36,20 @@ export class Checkout implements CheckoutInterface {
    * I think the pseudo codes maybe not restricted, therefore i add customerId as an extra parameter.
    */
   static create(
-    customerId: number,
+    customer: Customer,
     pricingRules: PricingRule[],
   ): CheckoutInterface {
     // check if pricingRules are all from the same customer
     if (
       pricingRules.length > 0 &&
-      !pricingRules.every((rule) => rule.customerId === customerId)
+      !pricingRules.every((rule) => rule.customerId === customer.id)
     ) {
       throw new Error('pricingRules must be from the same customer');
     }
 
     const checkout = new Checkout();
     (<any>checkout.pricingRules) = pricingRules;
-    (<any>checkout.customerId) = customerId;
+    (<any>checkout.customer) = customer;
 
     return checkout;
   }
@@ -70,12 +70,14 @@ export class Checkout implements CheckoutInterface {
   @Index()
   public deletedAt: Date | null;
 
+  @ApiProperty()
   @Column()
   readonly customerId: number;
 
   @ManyToOne((type) => Customer, (customer) => customer.checkouts)
   readonly customer: Customer;
 
+  @ApiProperty()
   @Column(centValueFeeColumnOptions)
   @Index()
   public totalValue: BigNumber;
@@ -84,6 +86,7 @@ export class Checkout implements CheckoutInterface {
   @JoinTable()
   readonly pricingRules: PricingRule[];
 
+  @ApiProperty()
   @Column({
     type: 'enum',
     enum: CheckoutStatus,
@@ -92,10 +95,12 @@ export class Checkout implements CheckoutInterface {
   @Index()
   public status: CheckoutStatus = CheckoutStatus.unpaid;
 
+  @ApiProperty()
   @Column({ nullable: true })
   @Index()
   public paidAt: Date | null;
 
+  @ApiProperty()
   @Column({ nullable: true })
   @Index()
   public confirmedAt: Date | null;
@@ -128,7 +133,7 @@ export class Checkout implements CheckoutInterface {
     // TODO: Implement total calculation with pricing rules
     // TODO: null pointer error handling
     this.totalValue = this.checkoutItems.reduce(
-      (pre, cur) => pre.plus(cur.item.value),
+      (pre, cur) => pre.plus(cur.item.value.multipliedBy(cur.quantity)),
       BigNumber(0),
     );
   }

@@ -91,7 +91,7 @@ export class CheckoutsService {
         );
 
       // Flow following the pseudo code of specification.
-      const checkout = Checkout.create(customer.id, pricingRules) as Checkout;
+      const checkout = Checkout.create(customer, pricingRules) as Checkout;
       checkout.batchAdd(
         items.map((item) => {
           return {
@@ -109,15 +109,17 @@ export class CheckoutsService {
        */
       const checkoutModel = this.checkoutRepository.create(checkout);
       await queryRunner.manager.save(checkoutModel, { reload: true });
-      checkout.checkoutItems = checkout.checkoutItems.map((checkoutItem) =>
+      const checkoutItemModels = checkout.checkoutItems.map((checkoutItem) =>
         this.checkoutItemRepository.create({
           ...checkoutItem,
           checkoutId: checkoutModel.id,
         }),
       );
-      await queryRunner.manager.save(checkout.checkoutItems, { reload: true });
+      await queryRunner.manager.save(checkoutItemModels, { reload: true });
 
       await this.transaction.commit(queryRunner);
+
+      checkoutModel.checkoutItems = checkoutItemModels;
       return checkoutModel;
     } catch (e) {
       if (queryRunner.isTransactionActive)
@@ -178,12 +180,9 @@ export class CheckoutsService {
         'customer',
         'customer.deletedAt is null',
       )
-      .leftJoinAndSelect('checkout.items', 'item', 'item.deletedAt is null')
-      .leftJoinAndSelect(
-        'checkout.pricingRules',
-        'pricingRule',
-        'pricingRule.deleted_at is null',
-      )
+      .leftJoinAndSelect('checkout.checkoutItems', 'checkoutItem')
+      .leftJoinAndSelect('checkoutItem.item', 'item')
+      .leftJoinAndSelect('checkout.pricingRules', 'pricingRule')
       .where({
         deletedAt: null,
       })
@@ -371,12 +370,9 @@ export class CheckoutsService {
         'customer',
         'customer.deletedAt is null',
       )
-      .leftJoinAndSelect('checkout.items', 'item', 'item.deletedAt is null')
-      .leftJoinAndSelect(
-        'checkout.pricingRules',
-        'pricingRule',
-        'pricingRule.deleted_at is null',
-      )
+      .leftJoinAndSelect('checkout.checkoutItems', 'checkoutItem')
+      .leftJoinAndSelect('checkoutItem.item', 'item')
+      .leftJoinAndSelect('checkout.pricingRules', 'pricingRule')
       .where('checkout.id = :id', { id })
       .andWhere('checkout.deleted_at is null')
       .getOne();

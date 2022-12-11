@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import BigNumber from 'bignumber.js';
 import { centValueFeeColumnOptions } from 'src/common/typeorm_columns_option/columnOptions';
 import {
@@ -21,6 +22,7 @@ export enum PricingRuleType {
 
 @Entity()
 export class PricingRule {
+  @ApiProperty()
   @PrimaryGeneratedColumn('increment')
   readonly id?: number;
 
@@ -36,18 +38,21 @@ export class PricingRule {
   @Index()
   public deletedAt: Date | null;
 
+  @ApiProperty()
   @Column()
   readonly customerId: number;
 
   @ManyToOne((type) => Customer, (customer) => customer.pricingRules)
   readonly customer: Customer;
 
+  @ApiProperty()
   @Column()
   readonly itemId: number;
 
   @ManyToOne((type) => Item, (item) => item.pricingRules)
   readonly item: Item;
 
+  @ApiProperty()
   @Column({
     type: 'enum',
     enum: PricingRuleType,
@@ -55,14 +60,17 @@ export class PricingRule {
   readonly type: PricingRuleType;
 
   /** Deal pricing rule */
+  @ApiProperty()
   @Column({ nullable: true })
   public fromQuantity?: number | null;
 
+  @ApiProperty()
   @Column({ nullable: true })
   public toQuantity?: number | null;
   /** End of deal pricing rule */
 
   /** Discount pricing rule */
+  @ApiProperty()
   @Column(centValueFeeColumnOptions)
   public discountValue?: BigNumber | null;
   /** End of discount pricing rule */

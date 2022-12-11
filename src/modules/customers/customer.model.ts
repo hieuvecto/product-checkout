@@ -47,6 +47,7 @@ export class Customer {
   @Column({ nullable: true })
   public iconImageUrl: string | null;
 
+  @ApiProperty()
   @Column({
     type: 'enum',
     enum: CustomerType,
