@@ -15,7 +15,10 @@ import {
 } from 'typeorm';
 import { Customer } from '../customers/customer.model';
 import { Item } from '../items/item.model';
-import { PricingRule } from '../pricing_rules/pricing_rule.model';
+import {
+  PricingRule,
+  PricingRuleType,
+} from '../pricing_rules/pricing_rule.model';
 import {
   CheckoutInterface,
   ItemWithQuantity,
@@ -28,6 +31,11 @@ export enum CheckoutStatus {
   confirmed = 'confirmed',
   cancelled = 'cancelled',
 }
+
+type ProcessingCheckoutItem = Pick<
+  CheckoutItem,
+  'itemId' | 'item' | 'quantity'
+> & { computedValue: BigNumber; discountedValue?: BigNumber };
 
 @Entity()
 export class Checkout implements CheckoutInterface {
@@ -130,12 +138,66 @@ export class Checkout implements CheckoutInterface {
   }
 
   public total(): void {
-    // TODO: Implement total calculation with pricing rules
-    // TODO: null pointer error handling
-    this.totalValue = this.checkoutItems.reduce(
-      (pre, cur) => pre.plus(cur.item.value.multipliedBy(cur.quantity)),
-      BigNumber(0),
-    );
+    // clone checkoutItems to avoid changing the original data
+    const clonedCheckoutItems: ProcessingCheckoutItem[] =
+      this.checkoutItems.map((ci) => {
+        if (!ci.item || !ci.quantity) {
+          throw new Error('CheckoutItem is not valid');
+        }
+        return {
+          ...ci,
+          computedValue: ci.item.price.multipliedBy(ci.quantity),
+        } as ProcessingCheckoutItem;
+      });
+    for (const pr of this.pricingRules) {
+      // find affected checkout item
+      const affectedCheckoutItem = clonedCheckoutItems.find(
+        (ci) => ci.itemId === pr.itemId,
+      );
+      if (!affectedCheckoutItem) {
+        continue;
+      }
+
+      // apply pricing rule
+      // TODO: add extra columns in the checkouts_pricing_rules table to store the detail of applied rule
+      switch (pr.type) {
+        case PricingRuleType.deal: {
+          if (!pr.fromQuantity || !pr.toQuantity) {
+            throw new Error('Dealing pricing rule is not valid');
+          }
+          const dealQuantityTimes = Math.floor(
+            affectedCheckoutItem.quantity / pr.fromQuantity,
+          );
+          const remainingQuantity =
+            affectedCheckoutItem.quantity % pr.fromQuantity;
+
+          affectedCheckoutItem.discountedValue =
+            affectedCheckoutItem.item.price.multipliedBy(
+              dealQuantityTimes * pr.toQuantity + remainingQuantity,
+            );
+          break;
+        }
+        case PricingRuleType.discount: {
+          if (!pr.discountPrice) {
+            throw new Error('Discount pricing rule is not valid');
+          }
+          affectedCheckoutItem.discountedValue = pr.discountPrice.multipliedBy(
+            affectedCheckoutItem.quantity,
+          );
+          break;
+        }
+        default:
+          throw new Error('PricingRuleType is not valid');
+      }
+    }
+
+    // calculate total value
+    this.totalValue = clonedCheckoutItems.reduce<BigNumber>((prev, cur) => {
+      if (cur.discountedValue) {
+        return prev.plus(cur.discountedValue);
+      }
+      return prev.plus(cur.computedValue);
+    }, new BigNumber(0));
   }
 
   public batchAdd(itemsWithQuantities: ItemWithQuantity[]): void {
@@ -150,6 +212,7 @@ export class Checkout implements CheckoutInterface {
         }),
       ];
     } else {
+      // add quantity to existing checkout item
       for (const iq of itemsWithQuantities) {
         const foundCheckoutsItems = this.checkoutItems.find(
           (ci) => ci.itemId === iq.item.id,

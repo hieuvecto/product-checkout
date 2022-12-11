@@ -72,7 +72,7 @@ export class PricingRule {
   /** Discount pricing rule */
   @ApiProperty()
   @Column(centValueFeeColumnOptions)
-  public discountValue?: BigNumber | null;
+  public discountPrice?: BigNumber | null;
   /** End of discount pricing rule */
 
   @ManyToMany((type) => Checkout, (checkout) => checkout.pricingRules)

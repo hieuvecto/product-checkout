@@ -84,6 +84,7 @@ export class CheckoutsService {
         throw new HttpException('Some Items not found.', HttpStatus.NOT_FOUND);
       }
 
+      // Get pricing rules by customer id.
       const pricingRules =
         await this.pricingRulesService.getPricingRulesByCustomerIdWithLock(
           queryRunner,
@@ -105,7 +106,7 @@ export class CheckoutsService {
 
       /**
        * No need to save pricingRules mapping in a seperated joined table,
-       * but to fit the pseudo code of specification, I save it.
+       * but to fit the pseudo codes of task specification, I save it.
        */
       const checkoutModel = this.checkoutRepository.create(checkout);
       await queryRunner.manager.save(checkoutModel, { reload: true });
@@ -287,7 +288,7 @@ export class CheckoutsService {
         throw new HttpException('Checkout not found.', HttpStatus.NOT_FOUND);
       }
 
-      /** More handling codes for ensuring customer has paid and the checkout data is valid.
+      /** More handling codes for ensuring customer has paid and the checkout data are valid.
        * This depends on the specific business requirements.
        */
 

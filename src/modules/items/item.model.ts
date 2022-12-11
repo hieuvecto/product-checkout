@@ -40,9 +40,13 @@ export class Item {
   @Column({ length: 4096, nullable: true, collation: 'utf8mb4_unicode_ci' })
   public description: string | null;
 
+  @ApiProperty({
+    description: 'The retail price of the item in cents',
+    example: '"1000"',
+  })
   @Column(centValueFeeColumnOptions)
   @Index()
-  public value: BigNumber;
+  public price: BigNumber;
 
   // TODO: handle the remaining amount of items
 
