@@ -67,7 +67,7 @@ export class CheckoutsController {
   @Put(':id/confirm')
   @ApiOperation({
     summary:
-      'Confirm the checkout by batch job or admin (Depends on specific requirements). Set status = confirmed.',
+      'Confirm the checkout by batch job or admin (Depends on specific requirements). Set status = confirmed).',
   })
   @ApiOkResponse({ type: Checkout })
   @ApiNotFoundResponse()
