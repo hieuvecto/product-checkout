@@ -1,3 +1,4 @@
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -125,6 +126,26 @@ describe('CheckoutsService', () => {
 
   const customerRecords = [
     {
+      type: 'default',
+      id: 1,
+      createdAt: '2022-12-11T02:19:51.781Z',
+      updatedAt: '2022-12-11T02:19:51.781Z',
+      deletedAt: null,
+      name: 'default',
+      displayName: 'default',
+      iconImageUrl: 'https://znews-stc.zdn.vn/static/topic/company/amazon.png',
+    },
+    {
+      type: 'privileged',
+      id: 2,
+      createdAt: '2022-12-11T02:19:51.781Z',
+      updatedAt: '2022-12-11T02:19:51.781Z',
+      deletedAt: null,
+      name: 'microsoft',
+      displayName: 'Microsoft',
+      iconImageUrl: 'https://znews-stc.zdn.vn/static/topic/company/amazon.png',
+    },
+    {
       type: 'privileged',
       id: 3,
       createdAt: '2022-12-11T02:19:51.781Z',
@@ -132,6 +153,16 @@ describe('CheckoutsService', () => {
       deletedAt: null,
       name: 'amazon',
       displayName: 'Amazon',
+      iconImageUrl: 'https://znews-stc.zdn.vn/static/topic/company/amazon.png',
+    },
+    {
+      type: 'privileged',
+      id: 4,
+      createdAt: '2022-12-11T02:19:51.781Z',
+      updatedAt: '2022-12-11T02:19:51.781Z',
+      deletedAt: null,
+      name: 'facebook',
+      displayName: 'Facebook',
       iconImageUrl: 'https://znews-stc.zdn.vn/static/topic/company/amazon.png',
     },
   ];
@@ -166,6 +197,13 @@ describe('CheckoutsService', () => {
   ];
   const pricingRuleRecords = [
     {
+      customerId: 2,
+      itemId: 1,
+      type: PricingRuleType.deal,
+      fromQuantity: 3,
+      toQuantity: 2,
+    },
+    {
       customerId: 3,
       itemId: 3,
       type: PricingRuleType.discount,
@@ -177,6 +215,13 @@ describe('CheckoutsService', () => {
       type: PricingRuleType.deal,
       fromQuantity: 3,
       toQuantity: 2,
+    },
+    {
+      customerId: 4,
+      itemId: 1,
+      type: PricingRuleType.deal,
+      fromQuantity: 5,
+      toQuantity: 4,
     },
   ];
 
@@ -285,5 +330,404 @@ describe('CheckoutsService', () => {
       expect((<any>service).transaction.commit).toBeCalled();
       expect((<any>service).transaction.rollback).not.toBeCalled();
     });
+  });
+
+  it('success: createCheckout case 1 - Default: Small Pizza x1 + Medium Pizza x1 +  Large Pizza x1', () => {
+    jest
+      .spyOn(<any>customerService, 'getCustomerByNameWithLock')
+      .mockImplementation((queryRunner: any, name: string) =>
+        Promise.resolve(
+          customerRecords.find(
+            (customer) => customer.name === name,
+          ) as unknown as Customer,
+        ),
+      );
+    jest
+      .spyOn(<any>itemsService, 'getItemsByIdsWithLock')
+      .mockImplementation((queryRunner: any, ids: number[]) =>
+        Promise.resolve(
+          itemRecords.filter((item) =>
+            ids.includes(item.id),
+          ) as unknown as Item[],
+        ),
+      );
+    jest
+      .spyOn(<any>pricingRulesService, 'getPricingRulesByCustomerIdWithLock')
+      .mockImplementation((queryRunner: any, customerId: number) =>
+        Promise.resolve(
+          pricingRuleRecords.filter(
+            (pr) => pr.customerId === customerId,
+          ) as unknown as PricingRule[],
+        ),
+      );
+
+    jest
+      .spyOn(mockCheckoutRepo, 'create')
+      .mockImplementation((model: any) => model as Checkout);
+    jest.spyOn(mockCheckoutRepo, 'save').mockImplementation((model: any) => {
+      model.id = 1;
+      return model;
+    });
+    jest
+      .spyOn(mockCheckoutItemRepo, 'create')
+      .mockImplementation((model: any) => model as CheckoutItem);
+    jest
+      .spyOn(mockCheckoutItemRepo, 'save')
+      .mockImplementation((model: any) => {
+        model.id = 1;
+        return model;
+      });
+
+    const dto = new CreateCheckoutInput();
+    dto.customerName = 'default';
+    dto.itemIdsWithQuantities = [
+      { itemId: 1, quantity: 1 },
+      { itemId: 2, quantity: 1 },
+      { itemId: 3, quantity: 1 },
+    ];
+  });
+
+  it('success: createCheckout case 2 - Microsoft: Small Pizza x3 +  Large Pizza x1', () => {
+    jest
+      .spyOn(<any>customerService, 'getCustomerByNameWithLock')
+      .mockImplementation((queryRunner: any, name: string) =>
+        Promise.resolve(
+          customerRecords.find(
+            (customer) => customer.name === name,
+          ) as unknown as Customer,
+        ),
+      );
+    jest
+      .spyOn(<any>itemsService, 'getItemsByIdsWithLock')
+      .mockImplementation((queryRunner: any, ids: number[]) =>
+        Promise.resolve(
+          itemRecords.filter((item) =>
+            ids.includes(item.id),
+          ) as unknown as Item[],
+        ),
+      );
+    jest
+      .spyOn(<any>pricingRulesService, 'getPricingRulesByCustomerIdWithLock')
+      .mockImplementation((queryRunner: any, customerId: number) =>
+        Promise.resolve(
+          pricingRuleRecords.filter(
+            (pr) => pr.customerId === customerId,
+          ) as unknown as PricingRule[],
+        ),
+      );
+
+    jest
+      .spyOn(mockCheckoutRepo, 'create')
+      .mockImplementation((model: any) => model as Checkout);
+    jest.spyOn(mockCheckoutRepo, 'save').mockImplementation((model: any) => {
+      model.id = 1;
+      return model;
+    });
+    jest
+      .spyOn(mockCheckoutItemRepo, 'create')
+      .mockImplementation((model: any) => model as CheckoutItem);
+    jest
+      .spyOn(mockCheckoutItemRepo, 'save')
+      .mockImplementation((model: any) => {
+        model.id = 1;
+        return model;
+      });
+
+    const dto = new CreateCheckoutInput();
+    dto.customerName = 'microsoft';
+    dto.itemIdsWithQuantities = [
+      { itemId: 1, quantity: 3 },
+      { itemId: 3, quantity: 1 },
+    ];
+
+    return service.createCheckout(dto).then((checkout) => {
+      expect(checkout.id).toEqual(1);
+      expect(checkout.totalValue.isEqualTo('5796')).toBeTruthy();
+      expect(checkout.discountedValue.isEqualTo('4597')).toBeTruthy();
+      expect(mockCheckoutRepo.create).toBeCalled();
+      expect(mockCheckoutRepo.save).toBeCalled();
+      expect(mockCheckoutItemRepo.create).toBeCalled();
+      expect(mockCheckoutItemRepo.save).toBeCalled();
+      expect((<any>service).transaction.startTransaction).toBeCalled();
+      expect((<any>service).transaction.commit).toBeCalled();
+      expect((<any>service).transaction.rollback).not.toBeCalled();
+    });
+  });
+
+  it('success: createCheckout case 3 - Amazon: Medium Pizza x3 +  Large Pizza x1', () => {
+    jest
+      .spyOn(<any>customerService, 'getCustomerByNameWithLock')
+      .mockImplementation((queryRunner: any, name: string) =>
+        Promise.resolve(
+          customerRecords.find(
+            (customer) => customer.name === name,
+          ) as unknown as Customer,
+        ),
+      );
+    jest
+      .spyOn(<any>itemsService, 'getItemsByIdsWithLock')
+      .mockImplementation((queryRunner: any, ids: number[]) =>
+        Promise.resolve(
+          itemRecords.filter((item) =>
+            ids.includes(item.id),
+          ) as unknown as Item[],
+        ),
+      );
+    jest
+      .spyOn(<any>pricingRulesService, 'getPricingRulesByCustomerIdWithLock')
+      .mockImplementation((queryRunner: any, customerId: number) =>
+        Promise.resolve(
+          pricingRuleRecords.filter(
+            (pr) => pr.customerId === customerId,
+          ) as unknown as PricingRule[],
+        ),
+      );
+
+    jest
+      .spyOn(mockCheckoutRepo, 'create')
+      .mockImplementation((model: any) => model as Checkout);
+    jest.spyOn(mockCheckoutRepo, 'save').mockImplementation((model: any) => {
+      model.id = 1;
+      return model;
+    });
+    jest
+      .spyOn(mockCheckoutItemRepo, 'create')
+      .mockImplementation((model: any) => model as CheckoutItem);
+    jest
+      .spyOn(mockCheckoutItemRepo, 'save')
+      .mockImplementation((model: any) => {
+        model.id = 1;
+        return model;
+      });
+
+    const dto = new CreateCheckoutInput();
+    dto.customerName = 'amazon';
+    dto.itemIdsWithQuantities = [
+      { itemId: 2, quantity: 3 },
+      { itemId: 3, quantity: 1 },
+    ];
+
+    return service.createCheckout(dto).then((checkout) => {
+      expect(checkout.id).toEqual(1);
+      expect(checkout.totalValue.isEqualTo('6996')).toBeTruthy();
+      expect(checkout.discountedValue.isEqualTo('6796')).toBeTruthy();
+      expect(mockCheckoutRepo.create).toBeCalled();
+      expect(mockCheckoutRepo.save).toBeCalled();
+      expect(mockCheckoutItemRepo.create).toBeCalled();
+      expect(mockCheckoutItemRepo.save).toBeCalled();
+      expect((<any>service).transaction.startTransaction).toBeCalled();
+      expect((<any>service).transaction.commit).toBeCalled();
+      expect((<any>service).transaction.rollback).not.toBeCalled();
+    });
+  });
+
+  it('fail: createCheckout - customer not found.', () => {
+    jest
+      .spyOn(<any>customerService, 'getCustomerByNameWithLock')
+      .mockImplementation((queryRunner: any, name: string) =>
+        Promise.resolve(
+          customerRecords.find(
+            (customer) => customer.name === name,
+          ) as unknown as Customer,
+        ),
+      );
+    jest
+      .spyOn(<any>itemsService, 'getItemsByIdsWithLock')
+      .mockImplementation((queryRunner: any, ids: number[]) =>
+        Promise.resolve(
+          itemRecords.filter((item) =>
+            ids.includes(item.id),
+          ) as unknown as Item[],
+        ),
+      );
+    jest
+      .spyOn(<any>pricingRulesService, 'getPricingRulesByCustomerIdWithLock')
+      .mockImplementation((queryRunner: any, customerId: number) =>
+        Promise.resolve(
+          pricingRuleRecords.filter(
+            (pr) => pr.customerId === customerId,
+          ) as unknown as PricingRule[],
+        ),
+      );
+
+    jest
+      .spyOn(mockCheckoutRepo, 'create')
+      .mockImplementation((model: any) => model as Checkout);
+    jest.spyOn(mockCheckoutRepo, 'save').mockImplementation((model: any) => {
+      model.id = 1;
+      return model;
+    });
+    jest
+      .spyOn(mockCheckoutItemRepo, 'create')
+      .mockImplementation((model: any) => model as CheckoutItem);
+    jest
+      .spyOn(mockCheckoutItemRepo, 'save')
+      .mockImplementation((model: any) => {
+        model.id = 1;
+        return model;
+      });
+
+    const dto = new CreateCheckoutInput();
+    dto.customerName = 'amazon-123';
+    dto.itemIdsWithQuantities = [
+      { itemId: 1, quantity: 3 },
+      { itemId: 2, quantity: 3 },
+      { itemId: 3, quantity: 1 },
+    ];
+
+    return service
+      .createCheckout(dto)
+      .then(() => {
+        throw new Error('fail');
+      })
+      .catch((e) => {
+        expect(e).toBeInstanceOf(HttpException);
+        expect(e.getStatus()).toEqual(HttpStatus.NOT_FOUND);
+        expect((<any>itemsService).getItemsByIdsWithLock).not.toBeCalled();
+        expect((<any>service).transaction.startTransaction).toBeCalled();
+        expect((<any>service).transaction.commit).not.toBeCalled();
+        expect((<any>service).transaction.rollback).toBeCalled();
+      });
+  });
+
+  it('fail: createCheckout - item ids are not unique.', () => {
+    jest
+      .spyOn(<any>customerService, 'getCustomerByNameWithLock')
+      .mockImplementation((queryRunner: any, name: string) =>
+        Promise.resolve(
+          customerRecords.find(
+            (customer) => customer.name === name,
+          ) as unknown as Customer,
+        ),
+      );
+    jest
+      .spyOn(<any>itemsService, 'getItemsByIdsWithLock')
+      .mockImplementation((queryRunner: any, ids: number[]) =>
+        Promise.resolve(
+          itemRecords.filter((item) =>
+            ids.includes(item.id),
+          ) as unknown as Item[],
+        ),
+      );
+    jest
+      .spyOn(<any>pricingRulesService, 'getPricingRulesByCustomerIdWithLock')
+      .mockImplementation((queryRunner: any, customerId: number) =>
+        Promise.resolve(
+          pricingRuleRecords.filter(
+            (pr) => pr.customerId === customerId,
+          ) as unknown as PricingRule[],
+        ),
+      );
+
+    jest
+      .spyOn(mockCheckoutRepo, 'create')
+      .mockImplementation((model: any) => model as Checkout);
+    jest.spyOn(mockCheckoutRepo, 'save').mockImplementation((model: any) => {
+      model.id = 1;
+      return model;
+    });
+    jest
+      .spyOn(mockCheckoutItemRepo, 'create')
+      .mockImplementation((model: any) => model as CheckoutItem);
+    jest
+      .spyOn(mockCheckoutItemRepo, 'save')
+      .mockImplementation((model: any) => {
+        model.id = 1;
+        return model;
+      });
+
+    const dto = new CreateCheckoutInput();
+    dto.customerName = 'amazon';
+    dto.itemIdsWithQuantities = [
+      { itemId: 1, quantity: 3 },
+      { itemId: 1, quantity: 3 },
+      { itemId: 3, quantity: 1 },
+    ];
+
+    return service
+      .createCheckout(dto)
+      .then(() => {
+        throw new Error('fail');
+      })
+      .catch((e) => {
+        expect(e).toBeInstanceOf(HttpException);
+        expect(e.getStatus()).toEqual(HttpStatus.BAD_REQUEST);
+        expect((<any>itemsService).getItemsByIdsWithLock).not.toBeCalled();
+        expect((<any>service).transaction.startTransaction).toBeCalled();
+        expect((<any>service).transaction.commit).not.toBeCalled();
+        expect((<any>service).transaction.rollback).toBeCalled();
+      });
+  });
+
+  it('fail: createCheckout - Some Items not found.', () => {
+    jest
+      .spyOn(<any>customerService, 'getCustomerByNameWithLock')
+      .mockImplementation((queryRunner: any, name: string) =>
+        Promise.resolve(
+          customerRecords.find(
+            (customer) => customer.name === name,
+          ) as unknown as Customer,
+        ),
+      );
+    jest
+      .spyOn(<any>itemsService, 'getItemsByIdsWithLock')
+      .mockImplementation((queryRunner: any, ids: number[]) =>
+        Promise.resolve(
+          itemRecords.filter((item) =>
+            ids.includes(item.id),
+          ) as unknown as Item[],
+        ),
+      );
+    jest
+      .spyOn(<any>pricingRulesService, 'getPricingRulesByCustomerIdWithLock')
+      .mockImplementation((queryRunner: any, customerId: number) =>
+        Promise.resolve(
+          pricingRuleRecords.filter(
+            (pr) => pr.customerId === customerId,
+          ) as unknown as PricingRule[],
+        ),
+      );
+
+    jest
+      .spyOn(mockCheckoutRepo, 'create')
+      .mockImplementation((model: any) => model as Checkout);
+    jest.spyOn(mockCheckoutRepo, 'save').mockImplementation((model: any) => {
+      model.id = 1;
+      return model;
+    });
+    jest
+      .spyOn(mockCheckoutItemRepo, 'create')
+      .mockImplementation((model: any) => model as CheckoutItem);
+    jest
+      .spyOn(mockCheckoutItemRepo, 'save')
+      .mockImplementation((model: any) => {
+        model.id = 1;
+        return model;
+      });
+
+    const dto = new CreateCheckoutInput();
+    dto.customerName = 'amazon';
+    dto.itemIdsWithQuantities = [
+      { itemId: 1, quantity: 3 },
+      { itemId: 5, quantity: 3 },
+      { itemId: 3, quantity: 1 },
+    ];
+
+    return service
+      .createCheckout(dto)
+      .then(() => {
+        throw new Error('fail');
+      })
+      .catch((e) => {
+        expect(e).toBeInstanceOf(HttpException);
+        expect(e.getStatus()).toEqual(HttpStatus.NOT_FOUND);
+        expect((<any>itemsService).getItemsByIdsWithLock).toBeCalled();
+        expect(
+          (<any>pricingRulesService).getPricingRulesByCustomerIdWithLock,
+        ).not.toBeCalled();
+        expect((<any>service).transaction.startTransaction).toBeCalled();
+        expect((<any>service).transaction.commit).not.toBeCalled();
+        expect((<any>service).transaction.rollback).toBeCalled();
+      });
   });
 });
