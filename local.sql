@@ -64,21 +64,21 @@ CREATE TABLE `checkouts` (
   `updated_at` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
   `deleted_at` datetime DEFAULT NULL,
   `customer_id` int NOT NULL,
-  `total_value` decimal(16,0) NOT NULL,
+  `sub_total_value` decimal(16,0) NOT NULL,
   `status` enum('unpaid','paid','confirmed','cancelled') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'unpaid',
   `paid_at` datetime DEFAULT NULL,
   `confirmed_at` datetime DEFAULT NULL,
-  `discounted_value` decimal(16,0) NOT NULL,
+  `total_value` decimal(16,0) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `IDX_6de7d590e66ee65644217c9e3f` (`created_at`),
   KEY `IDX_90622a94a7492ac778b367ba2a` (`updated_at`),
   KEY `IDX_5f160efb3e209ea23eae22d479` (`deleted_at`),
-  KEY `IDX_4e902f73b6cc752ec11026134c` (`total_value`),
   KEY `IDX_e122b4131eba90a0becaa0e3b9` (`status`),
   KEY `IDX_018365ce3faba210341b42f8c9` (`paid_at`),
   KEY `IDX_118df31212a11f0efcce97c16b` (`confirmed_at`),
   KEY `FK_085b53031b032b8daa84e9a6d06` (`customer_id`),
-  KEY `IDX_ac3fe5368134a18c5b6f1b4f92` (`discounted_value`),
+  KEY `IDX_6a099f07e071afbea0a84620e7` (`sub_total_value`),
+  KEY `IDX_4e902f73b6cc752ec11026134c` (`total_value`),
   CONSTRAINT `FK_085b53031b032b8daa84e9a6d06` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -171,6 +171,8 @@ CREATE TABLE `items` (
   `title` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` varchar(4096) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `price` decimal(16,0) NOT NULL,
+  `image_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `thumbnail_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `IDX_02c9c7f4f86c3628ba6ec2e02b` (`created_at`),
   KEY `IDX_e43a64f27096177120d2e05cf6` (`updated_at`),
@@ -185,7 +187,7 @@ CREATE TABLE `items` (
 
 LOCK TABLES `items` WRITE;
 /*!40000 ALTER TABLE `items` DISABLE KEYS */;
-INSERT INTO `items` VALUES (1,'2022-12-11 09:26:12.537349','2022-12-11 09:27:09.175398',NULL,'Small Pizza','10\'\' pizza for one person',1199),(2,'2022-12-11 09:26:38.815884','2022-12-11 09:27:09.195574',NULL,'Medium Pizza','12\'\' Pizza for two persons',1599),(3,'2022-12-11 09:27:36.557597','2022-12-11 09:27:36.557597',NULL,'Large Pizza','15\'\' Pizza for four persons',2199);
+INSERT INTO `items` VALUES (1,'2022-12-11 09:26:12.537349','2022-12-12 01:00:26.705450',NULL,'Small Pizza','10\'\' pizza for one person',1199,'https://media.istockphoto.com/id/639963606/photo/mini-salami-pizza-on-a-dark-wooden-background-top-view.jpg?s=612x612&w=0&k=20&c=iNFtKW_nd8Se7fmMIxZ4Gm1U11B3hRCUK64Us8ZN6jg=','https://media.istockphoto.com/id/639963606/photo/mini-salami-pizza-on-a-dark-wooden-background-top-view.jpg?s=612x612&w=0&k=20&c=iNFtKW_nd8Se7fmMIxZ4Gm1U11B3hRCUK64Us8ZN6jg='),(2,'2022-12-11 09:26:38.815884','2022-12-12 01:01:34.031386',NULL,'Medium Pizza','12\'\' Pizza for two persons',1599,'https://c8.alamy.com/comp/2AE8FM0/pizza-isolate-medium-size-side-view-stock-photo-of-pizza-2AE8FM0.jpg','https://c8.alamy.com/comp/2AE8FM0/pizza-isolate-medium-size-side-view-stock-photo-of-pizza-2AE8FM0.jpg'),(3,'2022-12-11 09:27:36.557597','2022-12-12 01:01:38.045521',NULL,'Large Pizza','15\'\' Pizza for four persons',2199,'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMkd5t4acI9FTHU8D1Xj4dtT6a1Ab3NuF2Z-hC1j0R&s','https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMkd5t4acI9FTHU8D1Xj4dtT6a1Ab3NuF2Z-hC1j0R&s');
 /*!40000 ALTER TABLE `items` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -237,4 +239,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-12  1:59:51
+-- Dump completed on 2022-12-12 18:29:07
