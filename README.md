@@ -1,4 +1,4 @@
-# Fixure Management.
+# Product checkout
 
 ## Prerequisites
 
