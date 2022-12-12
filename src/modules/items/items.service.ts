@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TransactionInterface } from 'src/common/transaction/transaction.interface';
 import { QueryRunner, Repository } from 'typeorm';
+import { ItemsQueryInput } from './dto/items_query_input.dto';
 import { Item } from './item.model';
 
 @Injectable()
@@ -15,6 +16,27 @@ export class ItemsService {
   ) {}
 
   private readonly logger = new Logger(ItemsService.name);
+
+  /**
+   * Get the array of item records with specified parameters.
+   * @param {ItemsQueryInput} args - query input fields such as offset, limit.
+   * @return {Item[]} item records.
+   * @throws {Error} - Internal server error.
+   */
+  async getItems({ limit, offset }: ItemsQueryInput): Promise<Item[]> {
+    const qb = this.itemRepository
+      .createQueryBuilder('item')
+      .where({
+        deletedAt: null,
+      })
+      .take(limit)
+      .skip(offset);
+
+    return qb.getMany().catch((e) => {
+      this.logger.error(e);
+      throw new Error('Failed to get items.');
+    });
+  }
 
   /**
    * Get item records by ids with lock.

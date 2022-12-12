@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import BigNumber from 'bignumber.js';
 import { centValueFeeColumnOptions } from 'src/common/typeorm_columns_option/columnOptions';
 import {
@@ -36,7 +36,7 @@ export class Item {
   @Column({ length: 32, collation: 'utf8mb4_unicode_ci' })
   public title: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @Column({ length: 4096, nullable: true, collation: 'utf8mb4_unicode_ci' })
   public description: string | null;
 
@@ -47,6 +47,14 @@ export class Item {
   @Column(centValueFeeColumnOptions)
   @Index()
   public price: BigNumber;
+
+  @ApiPropertyOptional()
+  @Column({ nullable: true })
+  public imageUrl: string | null;
+
+  @ApiPropertyOptional()
+  @Column({ nullable: true })
+  public thumbnailUrl: string | null;
 
   // TODO: handle the remaining amount of items
 
