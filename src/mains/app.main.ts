@@ -16,6 +16,7 @@ const loggerInstance =
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     ...loggerInstance,
+    cors: true,
   });
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.use(json({ limit: '10mb' }));

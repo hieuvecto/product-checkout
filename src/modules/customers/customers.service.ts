@@ -121,6 +121,11 @@ export class CustomersService {
   }: CustomersQueryInput): Promise<Customer[]> {
     const qb = this.customerRepository
       .createQueryBuilder('customer')
+      .leftJoinAndSelect(
+        'customer.pricingRules',
+        'pricingRule',
+        'pricingRule.deletedAt is null',
+      )
       .where({
         deletedAt: null,
       })

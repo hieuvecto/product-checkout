@@ -35,7 +35,7 @@ export enum CheckoutStatus {
 type ProcessingCheckoutItem = Pick<
   CheckoutItem,
   'itemId' | 'item' | 'quantity'
-> & { totalValue: BigNumber; discountedValue?: BigNumber };
+> & { subTotalValue: BigNumber; totalValue?: BigNumber };
 
 @Entity()
 export class Checkout implements CheckoutInterface {
@@ -90,14 +90,14 @@ export class Checkout implements CheckoutInterface {
   })
   @Column(centValueFeeColumnOptions)
   @Index()
-  public totalValue: BigNumber;
+  public subTotalValue: BigNumber;
 
   @ApiProperty({
     description: 'The value after applying the pricing rules (Cent unit ¢)',
   })
   @Column(centValueFeeColumnOptions)
   @Index()
-  public discountedValue: BigNumber;
+  public totalValue: BigNumber;
 
   @ManyToMany((type) => PricingRule, (rule) => rule.checkouts)
   @JoinTable()
@@ -157,7 +157,7 @@ export class Checkout implements CheckoutInterface {
         }
         return {
           ...ci,
-          totalValue: ci.item.price.multipliedBy(ci.quantity),
+          subTotalValue: ci.item.price.multipliedBy(ci.quantity),
         } as ProcessingCheckoutItem;
       });
     for (const pr of this.pricingRules) {
@@ -182,7 +182,7 @@ export class Checkout implements CheckoutInterface {
           const remainingQuantity =
             affectedCheckoutItem.quantity % pr.fromQuantity;
 
-          affectedCheckoutItem.discountedValue =
+          affectedCheckoutItem.totalValue =
             affectedCheckoutItem.item.price.multipliedBy(
               dealQuantityTimes * pr.toQuantity + remainingQuantity,
             );
@@ -192,7 +192,7 @@ export class Checkout implements CheckoutInterface {
           if (!pr.discountPrice) {
             throw new Error('Discount pricing rule is not valid');
           }
-          affectedCheckoutItem.discountedValue = pr.discountPrice.multipliedBy(
+          affectedCheckoutItem.totalValue = pr.discountPrice.multipliedBy(
             affectedCheckoutItem.quantity,
           );
           break;
@@ -202,17 +202,14 @@ export class Checkout implements CheckoutInterface {
       }
     }
 
-    // calculate total value
-    this.totalValue = clonedCheckoutItems.reduce<BigNumber>((prev, cur) => {
-      return prev.plus(cur.totalValue);
+    // calculate subTotal value
+    this.subTotalValue = clonedCheckoutItems.reduce<BigNumber>((prev, cur) => {
+      return prev.plus(cur.subTotalValue);
     }, new BigNumber(0));
-    // calculate discounted value
-    this.discountedValue = clonedCheckoutItems.reduce<BigNumber>(
-      (prev, cur) => {
-        return prev.plus(cur.discountedValue || cur.totalValue);
-      },
-      new BigNumber(0),
-    );
+    // calculate total value (after applying pricing rules)
+    this.totalValue = clonedCheckoutItems.reduce<BigNumber>((prev, cur) => {
+      return prev.plus(cur.totalValue || cur.subTotalValue);
+    }, new BigNumber(0));
   }
 
   public batchAdd(itemsWithQuantities: ItemWithQuantity[]): void {

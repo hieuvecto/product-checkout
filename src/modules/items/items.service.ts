@@ -39,6 +39,19 @@ export class ItemsService {
   }
 
   /**
+   * Get item records by ids.
+   * @throws {Error} sql, db related error.
+   */
+  public async getItemsByIds(ids: number[]): Promise<Item[]> {
+    return this.itemRepository
+      .createQueryBuilder('item')
+      .useTransaction(false)
+      .where('item.id in (:...ids)', { ids })
+      .andWhere('item.deleted_at is null')
+      .getMany();
+  }
+
+  /**
    * Get item records by ids with lock.
    * @throws {Error} sql, db related error.
    */

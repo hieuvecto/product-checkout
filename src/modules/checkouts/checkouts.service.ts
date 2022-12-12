@@ -138,6 +138,69 @@ export class CheckoutsService {
   }
 
   /**
+   * Compute temporary checkout (without saving to database)
+   * @param {CreateCheckoutInput} args - body input fields such as customerName, itemIds
+   * @return {Checkout} Checkout record.
+   * @throws {HttpException} - Http exception with status code = 400, 404.
+   * @throws {Error} - Internal server error.
+   */
+  async computeTemporaryCheckout({
+    customerName,
+    itemIdsWithQuantities,
+  }: CreateCheckoutInput): Promise<Checkout> {
+    try {
+      const customer = await this.customerService.getCustomerByName(
+        customerName,
+      );
+      if (!customer) {
+        throw new HttpException('Customer not found.', HttpStatus.NOT_FOUND);
+      }
+
+      // Check unique itemIds in itemIdsWithQuantities.
+      if (
+        itemIdsWithQuantities.length !==
+        new Set(itemIdsWithQuantities.map((element) => element.itemId)).size
+      ) {
+        throw new HttpException(
+          'Item ids must be unique.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      const items = await this.itemsService.getItemsByIds(
+        itemIdsWithQuantities.map((element) => element.itemId),
+      );
+      if (items.length !== itemIdsWithQuantities.length) {
+        throw new HttpException('Some Items not found.', HttpStatus.NOT_FOUND);
+      }
+
+      // Get pricing rules by customer id.
+      const pricingRules =
+        await this.pricingRulesService.getPricingRulesByCustomerId(customer.id);
+
+      // Flow following the pseudo code of specification.
+      const checkout = Checkout.create(customer, pricingRules) as Checkout;
+      checkout.batchAdd(
+        items.map((item) => {
+          return {
+            item,
+            quantity: itemIdsWithQuantities.find((iq) => iq.itemId === item.id)
+              .quantity,
+          };
+        }),
+      );
+      checkout.total();
+
+      return checkout;
+    } catch (e) {
+      if (e instanceof HttpException) {
+        throw e;
+      }
+      this.logger.error(e);
+      throw new Error('Failed to create checkout.');
+    }
+  }
+
+  /**
    * get checkout record.
    * @param {CheckoutParamInput} {id} - id of checkout record.
    * @return {Checkout} Checkout record.
@@ -241,7 +304,7 @@ export class CheckoutsService {
       if (!checkout) {
         throw new HttpException('Checkout not found.', HttpStatus.NOT_FOUND);
       }
-      if (!checkout.discountedValue.isEqualTo(value)) {
+      if (!checkout.totalValue.isEqualTo(value)) {
         throw new HttpException('Invalid value.', HttpStatus.BAD_REQUEST);
       }
 

@@ -22,8 +22,8 @@ class MockEntityManager extends EntityManager {
     ) {
       return this.mockRepositories.get('Item');
     } else if (
-      entity.hasOwnProperty('totalValue') &&
-      entity.hasOwnProperty('discountedValue')
+      entity.hasOwnProperty('subTotalValue') &&
+      entity.hasOwnProperty('totalValue')
     ) {
       return this.mockRepositories.get('Checkout');
     } else if (

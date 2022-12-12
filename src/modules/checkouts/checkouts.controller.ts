@@ -23,7 +23,7 @@ export class CheckoutsController {
   @Post()
   @ApiOperation({
     summary:
-      'Create the temporary checkout. (status = unpaid) (Has the lines which the flow follows the pseudo codes of specification).',
+      'Create the checkout. (status = unpaid) (Has the lines which the flow follows the pseudo codes of specification).',
   })
   @ApiOkResponse({ type: Checkout })
   @ApiNotFoundResponse()
@@ -31,6 +31,21 @@ export class CheckoutsController {
   @ApiInternalServerErrorResponse()
   async createCheckout(@Body() args: CreateCheckoutInput): Promise<Checkout> {
     return this.checkoutsService.createCheckout(args);
+  }
+
+  @Post('compute-temporarily')
+  @ApiOperation({
+    summary:
+      'Compute the temporary checkout (without saving to database). For computing the subTotal and total temporarily (Has the lines which the flow follows the pseudo codes of specification).',
+  })
+  @ApiOkResponse({ type: Checkout })
+  @ApiNotFoundResponse()
+  @ApiBadRequestResponse()
+  @ApiInternalServerErrorResponse()
+  async computeTemporaryCheckout(
+    @Body() args: CreateCheckoutInput,
+  ): Promise<Checkout> {
+    return this.checkoutsService.computeTemporaryCheckout(args);
   }
 
   @Get(':id')

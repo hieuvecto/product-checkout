@@ -28,6 +28,7 @@ describe('CheckoutsService', () => {
 
   const mockCheckoutRepo = new Repository<Checkout>();
   const mockCheckoutItemRepo = new Repository<CheckoutItem>();
+  const mockPricingRuleRepo = new Repository<PricingRule>();
 
   // Copy from json.
   const validBaseCheckout = {
@@ -37,8 +38,8 @@ describe('CheckoutsService', () => {
     updatedAt: '2022-12-11T06:28:44.735Z',
     deletedAt: null,
     customerId: 3,
-    totalValue: new BigNumber('10593'),
-    discountedValue: new BigNumber('9194'),
+    subTotalValue: new BigNumber('10593'),
+    totalValue: new BigNumber('9194'),
     paidAt: null,
     confirmedAt: null,
     customer: {
@@ -244,6 +245,10 @@ describe('CheckoutsService', () => {
           provide: getRepositoryToken(CheckoutItem),
           useValue: mockCheckoutItemRepo,
         },
+        {
+          provide: getRepositoryToken(PricingRule),
+          useValue: mockPricingRuleRepo,
+        },
       ],
       imports: [
         ConfigModule.forRoot({
@@ -320,8 +325,8 @@ describe('CheckoutsService', () => {
 
     return service.createCheckout(dto).then((checkout) => {
       expect(checkout.id).toEqual(1);
-      expect(checkout.totalValue.isEqualTo('10593')).toBeTruthy();
-      expect(checkout.discountedValue.isEqualTo('9194')).toBeTruthy();
+      expect(checkout.subTotalValue.isEqualTo('10593')).toBeTruthy();
+      expect(checkout.totalValue.isEqualTo('9194')).toBeTruthy();
       expect(mockCheckoutRepo.create).toBeCalled();
       expect(mockCheckoutRepo.save).toBeCalled();
       expect(mockCheckoutItemRepo.create).toBeCalled();
@@ -442,8 +447,8 @@ describe('CheckoutsService', () => {
 
     return service.createCheckout(dto).then((checkout) => {
       expect(checkout.id).toEqual(1);
-      expect(checkout.totalValue.isEqualTo('5796')).toBeTruthy();
-      expect(checkout.discountedValue.isEqualTo('4597')).toBeTruthy();
+      expect(checkout.subTotalValue.isEqualTo('5796')).toBeTruthy();
+      expect(checkout.totalValue.isEqualTo('4597')).toBeTruthy();
       expect(mockCheckoutRepo.create).toBeCalled();
       expect(mockCheckoutRepo.save).toBeCalled();
       expect(mockCheckoutItemRepo.create).toBeCalled();
@@ -509,8 +514,8 @@ describe('CheckoutsService', () => {
 
     return service.createCheckout(dto).then((checkout) => {
       expect(checkout.id).toEqual(1);
-      expect(checkout.totalValue.isEqualTo('6996')).toBeTruthy();
-      expect(checkout.discountedValue.isEqualTo('6796')).toBeTruthy();
+      expect(checkout.subTotalValue.isEqualTo('6996')).toBeTruthy();
+      expect(checkout.totalValue.isEqualTo('6796')).toBeTruthy();
       expect(mockCheckoutRepo.create).toBeCalled();
       expect(mockCheckoutRepo.save).toBeCalled();
       expect(mockCheckoutItemRepo.create).toBeCalled();
